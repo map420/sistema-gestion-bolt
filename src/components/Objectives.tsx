@@ -511,7 +511,9 @@ function ObjectiveForm({
       </div>
     </div>
   );
-}{
+}
+
+function KeyResultForm({
   objectiveId,
   onClose,
   onSuccess,
