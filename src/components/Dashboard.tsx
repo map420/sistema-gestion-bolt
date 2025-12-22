@@ -11,6 +11,7 @@ import {
   ArrowUp,
   ArrowDown,
 } from 'lucide-react';
+import type { ReactNode } from 'react';
 
 interface Stats {
   transactions: number;
@@ -22,6 +23,8 @@ interface Stats {
   activeProjects: number;
   activeHabits: number;
   completedTasksToday: number;
+  completedHabitsToday: number;
+  habitCompletionRate: number;
 }
 
 export default function Dashboard() {
@@ -52,6 +55,7 @@ export default function Dashboard() {
         { count: projectsCount },
         { count: habitsCount },
         { count: tasksCount },
+        { data: habitLogsData },
       ] = await Promise.all([
         supabase
           .from('transactions')
@@ -98,10 +102,18 @@ export default function Dashboard() {
           .eq('user_id', user.id)
           .eq('status', 'done')
           .gte('created_at', today),
+        supabase
+          .from('habit_logs')
+          .select('completed')
+          .eq('user_id', user.id)
+          .eq('log_date', today),
       ]);
 
       const totalIncome = incomeData?.reduce((sum, t) => sum + Number(t.amount), 0) || 0;
       const totalExpenses = expenseData?.reduce((sum, t) => sum + Number(t.amount), 0) || 0;
+      const completedHabitsCount = habitLogsData?.filter((log) => log.completed).length || 0;
+      const habitCompletionRate =
+        habitsCount && habitsCount > 0 ? Math.round((completedHabitsCount / habitsCount) * 100) : 0;
 
       setStats({
         transactions: transactionsCount || 0,
@@ -113,6 +125,8 @@ export default function Dashboard() {
         activeProjects: projectsCount || 0,
         activeHabits: habitsCount || 0,
         completedTasksToday: tasksCount || 0,
+        completedHabitsToday: completedHabitsCount,
+        habitCompletionRate,
       });
     } catch (error) {
       console.error('Error loading stats:', error);
@@ -193,20 +207,69 @@ export default function Dashboard() {
         />
 
         <StatCard
-          title="Hábitos"
-          value={stats?.activeHabits || 0}
-          subtitle="activos"
-          icon={<TrendingUp className="w-6 h-6" />}
-          color="teal"
-        />
-
-        <StatCard
           title="Tareas completadas"
           value={stats?.completedTasksToday || 0}
           subtitle="hoy"
           icon={<FolderKanban className="w-6 h-6" />}
           color="indigo"
         />
+      </div>
+
+      {/* Sección mejorada de Hábitos */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-gradient-to-br from-teal-50 to-teal-100 p-6 rounded-lg shadow-sm border border-teal-200">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-sm font-medium text-teal-700">Hábitos Registrados</h3>
+              <p className="text-xs text-teal-600 mt-1">Total de hábitos activos</p>
+            </div>
+            <div className="bg-teal-600 p-3 rounded-lg">
+              <TrendingUp className="w-6 h-6 text-white" />
+            </div>
+          </div>
+          <div className="mt-6">
+            <div className="text-4xl font-bold text-teal-900">{stats?.activeHabits || 0}</div>
+            <div className="flex items-center gap-2 mt-4">
+              <div className="h-2 bg-teal-200 rounded-full flex-1"></div>
+              <span className="text-xs font-medium text-teal-700">Activos</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 p-6 rounded-lg shadow-sm border border-emerald-200">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-sm font-medium text-emerald-700">Hábitos Cumplidos Hoy</h3>
+              <p className="text-xs text-emerald-600 mt-1">Tasa de cumplimiento diario</p>
+            </div>
+            <div className="bg-emerald-600 p-3 rounded-lg">
+              <TrendingUp className="w-6 h-6 text-white" />
+            </div>
+          </div>
+          <div className="mt-6">
+            <div className="flex items-end gap-4">
+              <div>
+                <div className="text-4xl font-bold text-emerald-900">
+                  {stats?.completedHabitsToday || 0}
+                </div>
+                <div className="text-xs text-emerald-600 mt-1">de {stats?.activeHabits || 0}</div>
+              </div>
+              <div className="flex-1">
+                <div className="text-right mb-2">
+                  <span className="text-2xl font-bold text-emerald-700">
+                    {stats?.habitCompletionRate || 0}%
+                  </span>
+                </div>
+                <div className="w-full h-3 bg-emerald-200 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-emerald-500 to-green-500 rounded-full transition-all duration-500"
+                    style={{ width: `${stats?.habitCompletionRate || 0}%` }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
