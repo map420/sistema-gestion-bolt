@@ -32,7 +32,7 @@ export default function Objectives() {
   const [keyResults, setKeyResults] = useState<Record<string, KeyResult[]>>({});
   const [showObjectiveForm, setShowObjectiveForm] = useState(false);
   const [showKRForm, setShowKRForm] = useState<string | null>(null);
-  const [selectedObjective, setSelectedObjective] = useState<Objective | null>(null);
+  const [editingObjective, setEditingObjective] = useState<Objective | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -108,7 +108,7 @@ export default function Objectives() {
         </div>
         <button
           onClick={() => {
-            setSelectedObjective(null);
+            setEditingObjective(null);
             setShowObjectiveForm(true);
           }}
           className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
@@ -223,6 +223,15 @@ export default function Objectives() {
                         <span className="capitalize">{objective.status.replace('_', ' ')}</span>
                       </div>
                       <button
+                        onClick={() => {
+                          setEditingObjective(objective);
+                          setShowObjectiveForm(true);
+                        }}
+                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                      >
+                        ✎
+                      </button>
+                      <button
                         onClick={() => deleteObjective(objective.id)}
                         className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
                       >
@@ -324,9 +333,14 @@ export default function Objectives() {
 
       {showObjectiveForm && (
         <ObjectiveForm
-          onClose={() => setShowObjectiveForm(false)}
+          editingObjective={editingObjective}
+          onClose={() => {
+            setShowObjectiveForm(false);
+            setEditingObjective(null);
+          }}
           onSuccess={() => {
             setShowObjectiveForm(false);
+            setEditingObjective(null);
             loadData();
           }}
         />
@@ -346,32 +360,47 @@ export default function Objectives() {
   );
 }
 
-function ObjectiveForm({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
+function ObjectiveForm({
+  editingObjective,
+  onClose,
+  onSuccess,
+}: {
+  editingObjective?: Objective | null;
+  onClose: () => void;
+  onSuccess: () => void;
+}) {
   const { user } = useAuth();
   const [formData, setFormData] = useState({
-    objective: '',
-    area: 'personal' as 'personal' | 'professional',
-    period: '',
-    priority: 'medium' as 'low' | 'medium' | 'high' | 'critical',
-    status: 'active' as Objective['status'],
-    description: '',
+    objective: editingObjective?.objective || '',
+    area: (editingObjective?.area || 'personal') as 'personal' | 'professional',
+    period: editingObjective?.period || '',
+    priority: (editingObjective?.priority || 'medium') as 'low' | 'medium' | 'high' | 'critical',
+    status: (editingObjective?.status || 'active') as Objective['status'],
+    description: editingObjective?.description || '',
   });
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!user) return;
 
-    await supabase.from('objectives').insert([
-      {
-        user_id: user.id,
-        objective: formData.objective,
-        area: formData.area,
-        period: formData.period,
-        priority: formData.priority,
-        status: formData.status,
-        description: formData.description || null,
-      },
-    ]);
+    const data = {
+      user_id: user.id,
+      objective: formData.objective,
+      area: formData.area,
+      period: formData.period,
+      priority: formData.priority,
+      status: formData.status,
+      description: formData.description || null,
+    };
+
+    if (editingObjective) {
+      await supabase
+        .from('objectives')
+        .update(data)
+        .eq('id', editingObjective.id);
+    } else {
+      await supabase.from('objectives').insert([data]);
+    }
 
     onSuccess();
   }
@@ -379,7 +408,9 @@ function ObjectiveForm({ onClose, onSuccess }: { onClose: () => void; onSuccess:
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-lg max-w-2xl w-full p-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Nuevo Objetivo</h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-4">
+          {editingObjective ? 'Editar Objetivo' : 'Nuevo Objetivo'}
+        </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -473,16 +504,14 @@ function ObjectiveForm({ onClose, onSuccess }: { onClose: () => void; onSuccess:
               type="submit"
               className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
             >
-              Guardar
+              {editingObjective ? 'Actualizar' : 'Guardar'}
             </button>
           </div>
         </form>
       </div>
     </div>
   );
-}
-
-function KeyResultForm({
+}{
   objectiveId,
   onClose,
   onSuccess,

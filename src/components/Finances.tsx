@@ -29,6 +29,8 @@ export default function Finances() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [goals, setGoals] = useState<FinancialGoal[]>([]);
   const [showForm, setShowForm] = useState(false);
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
+  const [editingGoal, setEditingGoal] = useState<FinancialGoal | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -84,7 +86,11 @@ export default function Finances() {
           <p className="text-gray-600 mt-1">Gestiona tus transacciones y metas financieras</p>
         </div>
         <button
-          onClick={() => setShowForm(true)}
+          onClick={() => {
+            setEditingTransaction(null);
+            setEditingGoal(null);
+            setShowForm(true);
+          }}
           className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
         >
           <Plus className="w-5 h-5" />
@@ -197,12 +203,23 @@ export default function Finances() {
                       >
                         {transaction.type === 'income' ? '+' : '-'}${Number(transaction.amount).toFixed(2)}
                       </div>
-                      <button
-                        onClick={() => deleteTransaction(transaction.id)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => {
+                            setEditingTransaction(transaction);
+                            setShowForm(true);
+                          }}
+                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                        >
+                          ✎
+                        </button>
+                        <button
+                          onClick={() => deleteTransaction(transaction.id)}
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -218,12 +235,23 @@ export default function Finances() {
                 <div key={goal.id} className="p-4 border border-gray-200 rounded-lg">
                   <div className="flex items-start justify-between mb-3">
                     <h3 className="font-semibold text-gray-900">{goal.objective}</h3>
-                    <button
-                      onClick={() => deleteGoal(goal.id)}
-                      className="p-1 text-red-600 hover:bg-red-50 rounded transition"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => {
+                          setEditingGoal(goal);
+                          setShowForm(true);
+                        }}
+                        className="p-1 text-blue-600 hover:bg-blue-50 rounded transition"
+                      >
+                        ✎
+                      </button>
+                      <button
+                        onClick={() => deleteGoal(goal.id)}
+                        className="p-1 text-red-600 hover:bg-red-50 rounded transition"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
@@ -263,9 +291,17 @@ export default function Finances() {
       {showForm && (
         <FormModal
           type={activeTab}
-          onClose={() => setShowForm(false)}
+          editingTransaction={editingTransaction}
+          editingGoal={editingGoal}
+          onClose={() => {
+            setShowForm(false);
+            setEditingTransaction(null);
+            setEditingGoal(null);
+          }}
           onSuccess={() => {
             setShowForm(false);
+            setEditingTransaction(null);
+            setEditingGoal(null);
             loadData();
           }}
         />
@@ -276,25 +312,29 @@ export default function Finances() {
 
 function FormModal({
   type,
+  editingTransaction,
+  editingGoal,
   onClose,
   onSuccess,
 }: {
   type: 'transactions' | 'goals';
+  editingTransaction?: Transaction | null;
+  editingGoal?: FinancialGoal | null;
   onClose: () => void;
   onSuccess: () => void;
 }) {
   const { user } = useAuth();
   const [formData, setFormData] = useState<any>({
-    date: new Date().toISOString().split('T')[0],
-    type: 'expense',
-    amount: '',
-    category: '',
-    method: '',
-    note: '',
-    objective: '',
-    target_amount: '',
-    target_date: '',
-    progress_percentage: 0,
+    date: editingTransaction?.date || new Date().toISOString().split('T')[0],
+    type: editingTransaction?.type || 'expense',
+    amount: editingTransaction?.amount || '',
+    category: editingTransaction?.category || '',
+    method: editingTransaction?.method || '',
+    note: editingTransaction?.note || '',
+    objective: editingGoal?.objective || '',
+    target_amount: editingGoal?.target_amount || '',
+    target_date: editingGoal?.target_date || '',
+    progress_percentage: editingGoal?.progress_percentage || 0,
   });
 
   async function handleSubmit(e: React.FormEvent) {
@@ -302,28 +342,59 @@ function FormModal({
     if (!user) return;
 
     if (type === 'transactions') {
-      await supabase.from('transactions').insert([
-        {
-          user_id: user.id,
-          date: formData.date,
-          amount: parseFloat(formData.amount),
-          type: formData.type,
-          category: formData.category,
-          method: formData.method || null,
-          note: formData.note || null,
-        },
-      ]);
+      if (editingTransaction) {
+        // Actualizar transacción
+        await supabase
+          .from('transactions')
+          .update({
+            date: formData.date,
+            amount: parseFloat(formData.amount),
+            type: formData.type,
+            category: formData.category,
+            method: formData.method || null,
+            note: formData.note || null,
+          })
+          .eq('id', editingTransaction.id);
+      } else {
+        // Crear transacción
+        await supabase.from('transactions').insert([
+          {
+            user_id: user.id,
+            date: formData.date,
+            amount: parseFloat(formData.amount),
+            type: formData.type,
+            category: formData.category,
+            method: formData.method || null,
+            note: formData.note || null,
+          },
+        ]);
+      }
     } else {
-      await supabase.from('financial_goals').insert([
-        {
-          user_id: user.id,
-          objective: formData.objective,
-          target_amount: parseFloat(formData.target_amount),
-          target_date: formData.target_date || null,
-          progress_percentage: parseInt(formData.progress_percentage) || 0,
-          notes: formData.note || null,
-        },
-      ]);
+      if (editingGoal) {
+        // Actualizar meta
+        await supabase
+          .from('financial_goals')
+          .update({
+            objective: formData.objective,
+            target_amount: parseFloat(formData.target_amount),
+            target_date: formData.target_date || null,
+            progress_percentage: parseInt(formData.progress_percentage) || 0,
+            notes: formData.note || null,
+          })
+          .eq('id', editingGoal.id);
+      } else {
+        // Crear meta
+        await supabase.from('financial_goals').insert([
+          {
+            user_id: user.id,
+            objective: formData.objective,
+            target_amount: parseFloat(formData.target_amount),
+            target_date: formData.target_date || null,
+            progress_percentage: parseInt(formData.progress_percentage) || 0,
+            notes: formData.note || null,
+          },
+        ]);
+      }
     }
 
     onSuccess();
@@ -333,7 +404,13 @@ function FormModal({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-lg max-w-md w-full p-6">
         <h2 className="text-xl font-bold text-gray-900 mb-4">
-          {type === 'transactions' ? 'Nueva Transacción' : 'Nueva Meta Financiera'}
+          {type === 'transactions'
+            ? editingTransaction
+              ? 'Editar Transacción'
+              : 'Nueva Transacción'
+            : editingGoal
+            ? 'Editar Meta Financiera'
+            : 'Nueva Meta Financiera'}
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -479,7 +556,13 @@ function FormModal({
               type="submit"
               className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
             >
-              Guardar
+              {type === 'transactions'
+                ? editingTransaction
+                  ? 'Actualizar'
+                  : 'Guardar'
+                : editingGoal
+                ? 'Actualizar'
+                : 'Guardar'}
             </button>
           </div>
         </form>

@@ -41,6 +41,7 @@ export default function Projects() {
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const [showProjectForm, setShowProjectForm] = useState(false);
   const [showTaskForm, setShowTaskForm] = useState(false);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<'projects' | 'kanban'>('projects');
 
@@ -110,7 +111,10 @@ export default function Projects() {
         </div>
         <div className="flex gap-2">
           <button
-            onClick={() => setShowProjectForm(true)}
+            onClick={() => {
+              setEditingProject(null);
+              setShowProjectForm(true);
+            }}
             className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
           >
             <Plus className="w-5 h-5" />
@@ -241,6 +245,15 @@ export default function Projects() {
                           </div>
                         </div>
                         <button
+                          onClick={() => {
+                            setEditingProject(project);
+                            setShowProjectForm(true);
+                          }}
+                          className="p-1 text-blue-600 hover:bg-blue-50 rounded transition"
+                        >
+                          ✎
+                        </button>
+                        <button
                           onClick={() => deleteProject(project.id)}
                           className="p-1 text-red-600 hover:bg-red-50 rounded transition"
                         >
@@ -334,9 +347,14 @@ export default function Projects() {
 
       {showProjectForm && (
         <ProjectForm
-          onClose={() => setShowProjectForm(false)}
+          editingProject={editingProject}
+          onClose={() => {
+            setShowProjectForm(false);
+            setEditingProject(null);
+          }}
           onSuccess={() => {
             setShowProjectForm(false);
+            setEditingProject(null);
             loadData();
           }}
         />
@@ -468,38 +486,53 @@ function KanbanColumn({
   );
 }
 
-function ProjectForm({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
+function ProjectForm({
+  editingProject,
+  onClose,
+  onSuccess,
+}: {
+  editingProject?: Project | null;
+  onClose: () => void;
+  onSuccess: () => void;
+}) {
   const { user } = useAuth();
   const [formData, setFormData] = useState({
-    name: '',
-    area: 'personal' as 'personal' | 'professional',
-    type: 'personal' as Project['type'],
-    status: 'backlog' as Project['status'],
-    priority: 'medium' as Project['priority'],
-    start_date: '',
-    deadline: '',
-    owner: '',
-    notes: '',
+    name: editingProject?.name || '',
+    area: (editingProject?.area || 'personal') as 'personal' | 'professional',
+    type: (editingProject?.type || 'personal') as Project['type'],
+    status: (editingProject?.status || 'backlog') as Project['status'],
+    priority: (editingProject?.priority || 'medium') as Project['priority'],
+    start_date: editingProject?.start_date || '',
+    deadline: editingProject?.deadline || '',
+    owner: editingProject?.owner || '',
+    notes: editingProject?.notes || '',
   });
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!user) return;
 
-    await supabase.from('projects').insert([
-      {
-        user_id: user.id,
-        name: formData.name,
-        area: formData.area,
-        type: formData.type,
-        status: formData.status,
-        priority: formData.priority,
-        start_date: formData.start_date || null,
-        deadline: formData.deadline || null,
-        owner: formData.owner || null,
-        notes: formData.notes || null,
-      },
-    ]);
+    const data = {
+      user_id: user.id,
+      name: formData.name,
+      area: formData.area,
+      type: formData.type,
+      status: formData.status,
+      priority: formData.priority,
+      start_date: formData.start_date || null,
+      deadline: formData.deadline || null,
+      owner: formData.owner || null,
+      notes: formData.notes || null,
+    };
+
+    if (editingProject) {
+      await supabase
+        .from('projects')
+        .update(data)
+        .eq('id', editingProject.id);
+    } else {
+      await supabase.from('projects').insert([data]);
+    }
 
     onSuccess();
   }
@@ -507,7 +540,9 @@ function ProjectForm({ onClose, onSuccess }: { onClose: () => void; onSuccess: (
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 overflow-y-auto">
       <div className="bg-white rounded-lg max-w-2xl w-full p-6 my-8">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Nuevo Proyecto</h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-4">
+          {editingProject ? 'Editar Proyecto' : 'Nuevo Proyecto'}
+        </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -634,7 +669,7 @@ function ProjectForm({ onClose, onSuccess }: { onClose: () => void; onSuccess: (
               type="submit"
               className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
             >
-              Guardar
+              {editingProject ? 'Actualizar' : 'Guardar'}
             </button>
           </div>
         </form>

@@ -22,7 +22,7 @@ export default function Contacts() {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [upcomingFollowUps, setUpcomingFollowUps] = useState<Contact[]>([]);
   const [showForm, setShowForm] = useState(false);
-  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
+  const [editingContact, setEditingContact] = useState<Contact | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -70,7 +70,7 @@ export default function Contacts() {
         </div>
         <button
           onClick={() => {
-            setSelectedContact(null);
+            setEditingContact(null);
             setShowForm(true);
           }}
           className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
@@ -150,15 +150,11 @@ export default function Contacts() {
                 return (
                   <div
                     key={contact.id}
-                    className={`p-4 border rounded-lg transition cursor-pointer ${
+                    className={`p-4 border rounded-lg transition ${
                       isUpcoming
                         ? 'border-orange-300 bg-orange-50'
                         : 'border-gray-200 hover:border-blue-300'
                     }`}
-                    onClick={() => {
-                      setSelectedContact(contact);
-                      setShowForm(true);
-                    }}
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div>
@@ -170,15 +166,27 @@ export default function Contacts() {
                           <p className="text-sm text-gray-500">{contact.role}</p>
                         )}
                       </div>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          deleteContact(contact.id);
-                        }}
-                        className="p-1 text-red-600 hover:bg-red-50 rounded transition"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingContact(contact);
+                            setShowForm(true);
+                          }}
+                          className="p-1 text-blue-600 hover:bg-blue-50 rounded transition"
+                        >
+                          ✎
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteContact(contact.id);
+                          }}
+                          className="p-1 text-red-600 hover:bg-red-50 rounded transition"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
 
                     <div className="space-y-2 text-sm">
@@ -224,14 +232,14 @@ export default function Contacts() {
 
       {showForm && (
         <ContactForm
-          contact={selectedContact}
+          editingContact={editingContact}
           onClose={() => {
             setShowForm(false);
-            setSelectedContact(null);
+            setEditingContact(null);
           }}
           onSuccess={() => {
             setShowForm(false);
-            setSelectedContact(null);
+            setEditingContact(null);
             loadContacts();
           }}
         />
@@ -241,25 +249,25 @@ export default function Contacts() {
 }
 
 function ContactForm({
-  contact,
+  editingContact,
   onClose,
   onSuccess,
 }: {
-  contact: Contact | null;
+  editingContact?: Contact | null;
   onClose: () => void;
   onSuccess: () => void;
 }) {
   const { user } = useAuth();
   const [formData, setFormData] = useState({
-    name: contact?.name || '',
-    company: contact?.company || '',
-    role: contact?.role || '',
-    email: contact?.email || '',
-    phone: contact?.phone || '',
-    industry: contact?.industry || '',
-    last_contact: contact?.last_contact || '',
-    next_contact: contact?.next_contact || '',
-    notes: contact?.notes || '',
+    name: editingContact?.name || '',
+    company: editingContact?.company || '',
+    role: editingContact?.role || '',
+    email: editingContact?.email || '',
+    phone: editingContact?.phone || '',
+    industry: editingContact?.industry || '',
+    last_contact: editingContact?.last_contact || '',
+    next_contact: editingContact?.next_contact || '',
+    notes: editingContact?.notes || '',
   });
 
   async function handleSubmit(e: React.FormEvent) {
@@ -279,11 +287,11 @@ function ContactForm({
       notes: formData.notes || null,
     };
 
-    if (contact) {
+    if (editingContact) {
       await supabase
         .from('professional_contacts')
         .update(data)
-        .eq('id', contact.id);
+        .eq('id', editingContact.id);
     } else {
       await supabase.from('professional_contacts').insert([data]);
     }
@@ -295,7 +303,7 @@ function ContactForm({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 overflow-y-auto">
       <div className="bg-white rounded-lg max-w-2xl w-full p-6 my-8">
         <h2 className="text-xl font-bold text-gray-900 mb-4">
-          {contact ? 'Editar Contacto' : 'Nuevo Contacto'}
+          {editingContact ? 'Editar Contacto' : 'Nuevo Contacto'}
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -412,7 +420,7 @@ function ContactForm({
               type="submit"
               className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
             >
-              {contact ? 'Actualizar' : 'Guardar'}
+              {editingContact ? 'Actualizar' : 'Guardar'}
             </button>
           </div>
         </form>

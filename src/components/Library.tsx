@@ -38,6 +38,7 @@ export default function Library() {
   const [items, setItems] = useState<LibraryItem[]>([]);
   const [filteredItems, setFilteredItems] = useState<LibraryItem[]>([]);
   const [showForm, setShowForm] = useState(false);
+  const [editingItem, setEditingItem] = useState<LibraryItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterType, setFilterType] = useState<string>('all');
@@ -98,7 +99,10 @@ export default function Library() {
           <p className="text-gray-600 mt-1">Gestiona tus recursos de aprendizaje</p>
         </div>
         <button
-          onClick={() => setShowForm(true)}
+          onClick={() => {
+            setEditingItem(null);
+            setShowForm(true);
+          }}
           className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
         >
           <Plus className="w-5 h-5" />
@@ -190,12 +194,23 @@ export default function Library() {
                           </div>
                         </div>
                       </div>
-                      <button
-                        onClick={() => deleteItem(item.id)}
-                        className="p-1 text-red-600 hover:bg-red-50 rounded transition"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => {
+                            setEditingItem(item);
+                            setShowForm(true);
+                          }}
+                          className="p-1 text-blue-600 hover:bg-blue-50 rounded transition"
+                        >
+                          ✎
+                        </button>
+                        <button
+                          onClick={() => deleteItem(item.id)}
+                          className="p-1 text-red-600 hover:bg-red-50 rounded transition"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
 
                     {item.summary && (
@@ -251,9 +266,14 @@ export default function Library() {
 
       {showForm && (
         <LibraryItemForm
-          onClose={() => setShowForm(false)}
+          editingItem={editingItem}
+          onClose={() => {
+            setShowForm(false);
+            setEditingItem(null);
+          }}
           onSuccess={() => {
             setShowForm(false);
+            setEditingItem(null);
             loadItems();
           }}
         />
@@ -262,18 +282,18 @@ export default function Library() {
   );
 }
 
-function LibraryItemForm({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
+function LibraryItemForm({ editingItem, onClose, onSuccess }: { editingItem?: LibraryItem | null; onClose: () => void; onSuccess: () => void }) {
   const { user } = useAuth();
   const [formData, setFormData] = useState({
-    title: '',
-    type: 'article' as LibraryItem['type'],
-    topic: '',
-    source: '',
-    link: '',
-    tags: '',
-    summary: '',
-    insight: '',
-    status: 'pending' as LibraryItem['status'],
+    title: editingItem?.title || '',
+    type: (editingItem?.type || 'article') as LibraryItem['type'],
+    topic: editingItem?.topic || '',
+    source: editingItem?.source || '',
+    link: editingItem?.link || '',
+    tags: editingItem?.tags?.join(', ') || '',
+    summary: editingItem?.summary || '',
+    insight: editingItem?.insight || '',
+    status: (editingItem?.status || 'pending') as LibraryItem['status'],
   });
 
   async function handleSubmit(e: React.FormEvent) {
@@ -285,20 +305,39 @@ function LibraryItemForm({ onClose, onSuccess }: { onClose: () => void; onSucces
       .map((t) => t.trim())
       .filter((t) => t);
 
-    await supabase.from('library_items').insert([
-      {
-        user_id: user.id,
-        title: formData.title,
-        type: formData.type,
-        topic: formData.topic || null,
-        source: formData.source || null,
-        link: formData.link || null,
-        tags: tagsArray.length > 0 ? tagsArray : null,
-        summary: formData.summary || null,
-        insight: formData.insight || null,
-        status: formData.status,
-      },
-    ]);
+    if (editingItem) {
+      // Actualizar recurso
+      await supabase
+        .from('library_items')
+        .update({
+          title: formData.title,
+          type: formData.type,
+          topic: formData.topic || null,
+          source: formData.source || null,
+          link: formData.link || null,
+          tags: tagsArray.length > 0 ? tagsArray : null,
+          summary: formData.summary || null,
+          insight: formData.insight || null,
+          status: formData.status,
+        })
+        .eq('id', editingItem.id);
+    } else {
+      // Crear recurso
+      await supabase.from('library_items').insert([
+        {
+          user_id: user.id,
+          title: formData.title,
+          type: formData.type,
+          topic: formData.topic || null,
+          source: formData.source || null,
+          link: formData.link || null,
+          tags: tagsArray.length > 0 ? tagsArray : null,
+          summary: formData.summary || null,
+          insight: formData.insight || null,
+          status: formData.status,
+        },
+      ]);
+    }
 
     onSuccess();
   }
@@ -306,7 +345,9 @@ function LibraryItemForm({ onClose, onSuccess }: { onClose: () => void; onSucces
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 overflow-y-auto">
       <div className="bg-white rounded-lg max-w-2xl w-full p-6 my-8">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Nuevo Recurso</h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-4">
+          {editingItem ? 'Editar Recurso' : 'Nuevo Recurso'}
+        </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -435,7 +476,7 @@ function LibraryItemForm({ onClose, onSuccess }: { onClose: () => void; onSucces
               type="submit"
               className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
             >
-              Guardar
+              {editingItem ? 'Actualizar' : 'Guardar'}
             </button>
           </div>
         </form>
