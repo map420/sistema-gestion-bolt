@@ -32,7 +32,10 @@ export default function Habits() {
   const [habits, setHabits] = useState<Habit[]>([]);
   const [logs, setLogs] = useState<HabitLog[]>([]);
   const [showForm, setShowForm] = useState(false);
+<<<<<<< HEAD
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
+=======
+>>>>>>> 265e0a7a03d5ddd6305d485f9603d90120e46fa7
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [loading, setLoading] = useState(true);
 
@@ -305,6 +308,7 @@ export default function Habits() {
                         </div>
                       </div>
 
+<<<<<<< HEAD
                       <div className="flex gap-2">
                         <button
                           onClick={() => {
@@ -322,6 +326,14 @@ export default function Habits() {
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
+=======
+                      <button
+                        onClick={() => deleteHabit(habit.id)}
+                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+>>>>>>> 265e0a7a03d5ddd6305d485f9603d90120e46fa7
                     </div>
                   </div>
                 );
@@ -333,6 +345,7 @@ export default function Habits() {
 
       {showForm && (
         <HabitForm
+<<<<<<< HEAD
           editingHabit={editingHabit}
           onClose={() => {
             setShowForm(false);
@@ -341,6 +354,11 @@ export default function Habits() {
           onSuccess={() => {
             setShowForm(false);
             setEditingHabit(null);
+=======
+          onClose={() => setShowForm(false)}
+          onSuccess={() => {
+            setShowForm(false);
+>>>>>>> 265e0a7a03d5ddd6305d485f9603d90120e46fa7
             loadData();
           }}
         />
@@ -349,6 +367,7 @@ export default function Habits() {
   );
 }
 
+<<<<<<< HEAD
 function HabitForm({ editingHabit, onClose, onSuccess }: { editingHabit: Habit | null; onClose: () => void; onSuccess: () => void }) {
   const { user } = useAuth();
   const [formData, setFormData] = useState({
@@ -359,12 +378,25 @@ function HabitForm({ editingHabit, onClose, onSuccess }: { editingHabit: Habit |
     trigger: editingHabit?.trigger || '',
     action: editingHabit?.action || '',
     reward: editingHabit?.reward || '',
+=======
+function HabitForm({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
+  const { user } = useAuth();
+  const [formData, setFormData] = useState({
+    habit: '',
+    category: 'health' as Habit['category'],
+    frequency: 'daily' as Habit['frequency'],
+    metric_type: 'boolean' as Habit['metric_type'],
+    trigger: '',
+    action: '',
+    reward: '',
+>>>>>>> 265e0a7a03d5ddd6305d485f9603d90120e46fa7
   });
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!user) return;
 
+<<<<<<< HEAD
     if (editingHabit) {
       // Actualizar hábito existente
       await supabase
@@ -396,6 +428,22 @@ function HabitForm({ editingHabit, onClose, onSuccess }: { editingHabit: Habit |
         },
       ]);
     }
+=======
+    await supabase.from('habits').insert([
+      {
+        user_id: user.id,
+        habit: formData.habit,
+        category: formData.category,
+        frequency: formData.frequency,
+        metric_type: formData.metric_type,
+        trigger: formData.trigger || null,
+        action: formData.action || null,
+        reward: formData.reward || null,
+        active: true,
+        consistency_score: 0,
+      },
+    ]);
+>>>>>>> 265e0a7a03d5ddd6305d485f9603d90120e46fa7
 
     onSuccess();
   }
@@ -403,7 +451,11 @@ function HabitForm({ editingHabit, onClose, onSuccess }: { editingHabit: Habit |
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-lg max-w-2xl w-full p-6">
+<<<<<<< HEAD
         <h2 className="text-xl font-bold text-gray-900 mb-4">{editingHabit ? 'Editar Hábito' : 'Nuevo Hábito'}</h2>
+=======
+        <h2 className="text-xl font-bold text-gray-900 mb-4">Nuevo Hábito</h2>
+>>>>>>> 265e0a7a03d5ddd6305d485f9603d90120e46fa7
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -509,7 +561,11 @@ function HabitForm({ editingHabit, onClose, onSuccess }: { editingHabit: Habit |
               type="submit"
               className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
             >
+<<<<<<< HEAD
               {editingHabit ? 'Actualizar' : 'Guardar'}
+=======
+              Guardar
+>>>>>>> 265e0a7a03d5ddd6305d485f9603d90120e46fa7
             </button>
           </div>
         </form>
