@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { Plus, Target, TrendingUp, AlertTriangle, CheckCircle, Trash2 } from 'lucide-react';
+import { Plus, Target, TrendingUp, AlertTriangle, CheckCircle, Trash2, Zap } from 'lucide-react';
 
 interface Objective {
   id: string;
@@ -140,6 +140,39 @@ export default function Objectives() {
           <div className="text-2xl font-bold text-red-600">{stats.atRisk}</div>
         </div>
       </div>
+
+      {/* At-Risk Objectives Alert */}
+      {objectives.some((o) => o.status === 'at_risk') && (
+        <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-lg shadow-sm border border-red-200">
+          <div className="p-6 border-b border-red-200">
+            <div className="flex items-center gap-3">
+              <div className="bg-red-100 p-2 rounded-lg">
+                <AlertTriangle className="w-5 h-5 text-red-600" />
+              </div>
+              <h2 className="text-lg font-semibold text-gray-900">Objetivos en Riesgo</h2>
+            </div>
+          </div>
+          <div className="p-6">
+            <div className="space-y-3">
+              {objectives
+                .filter((o) => o.status === 'at_risk')
+                .map((objective) => (
+                  <div key={objective.id} className="p-3 bg-white border border-red-200 rounded-lg">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="font-medium text-gray-900">{objective.objective}</div>
+                        <div className="text-sm text-red-600 mt-1">Requiere ajustes en KRs</div>
+                      </div>
+                      <span className="px-2 py-1 text-xs font-medium bg-red-100 text-red-700 rounded-full">
+                        {objective.priority}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="space-y-4">
         {loading ? (

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { Plus, FolderKanban, AlertCircle, Trash2, CheckSquare } from 'lucide-react';
+import { Plus, FolderKanban, AlertCircle, Trash2, CheckSquare, Calendar, TrendingUp, Flag } from 'lucide-react';
 
 interface Project {
   id: string;
@@ -153,6 +153,63 @@ export default function Projects() {
           <div className="text-sm text-gray-600 mb-1">Completados</div>
           <div className="text-2xl font-bold text-green-600">{stats.completed}</div>
         </div>
+      </div>
+
+      {/* Project Health & Upcoming Deadlines */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* At-Risk Projects */}
+        {projects.some((p) => p.status === 'blocked') && (
+          <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-lg shadow-sm border border-red-200">
+            <div className="p-6 border-b border-red-200">
+              <div className="flex items-center gap-3">
+                <div className="bg-red-100 p-2 rounded-lg">
+                  <AlertCircle className="w-5 h-5 text-red-600" />
+                </div>
+                <h3 className="font-semibold text-gray-900">Proyectos Bloqueados</h3>
+              </div>
+            </div>
+            <div className="p-6">
+              <div className="space-y-2">
+                {projects.filter((p) => p.status === 'blocked').map((project) => (
+                  <div key={project.id} className="p-2 bg-white border border-red-200 rounded-lg">
+                    <div className="text-sm font-medium text-gray-900">{project.name}</div>
+                    <div className="text-xs text-red-600">Requiere atención</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Upcoming Deadlines */}
+        {projects.some((p) => p.deadline && new Date(p.deadline) > new Date()) && (
+          <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-lg shadow-sm border border-yellow-200">
+            <div className="p-6 border-b border-yellow-200">
+              <div className="flex items-center gap-3">
+                <div className="bg-yellow-100 p-2 rounded-lg">
+                  <Calendar className="w-5 h-5 text-yellow-600" />
+                </div>
+                <h3 className="font-semibold text-gray-900">Próximas Fechas Límite</h3>
+              </div>
+            </div>
+            <div className="p-6">
+              <div className="space-y-2">
+                {projects
+                  .filter((p) => p.deadline && new Date(p.deadline) > new Date())
+                  .sort((a, b) => (a.deadline || '').localeCompare(b.deadline || ''))
+                  .slice(0, 3)
+                  .map((project) => (
+                    <div key={project.id} className="p-2 bg-white border border-yellow-200 rounded-lg">
+                      <div className="text-sm font-medium text-gray-900">{project.name}</div>
+                      <div className="text-xs text-yellow-600">
+                        {project.deadline && new Date(project.deadline).toLocaleDateString('es-ES')}
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">

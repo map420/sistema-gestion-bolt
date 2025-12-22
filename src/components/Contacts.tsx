@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { Plus, Users, Mail, Phone, Briefcase, Calendar, Trash2, AlertCircle } from 'lucide-react';
+import { Plus, Users, Mail, Phone, Briefcase, Calendar, Trash2, AlertCircle, Clock, TrendingUp } from 'lucide-react';
 
 interface Contact {
   id: string;

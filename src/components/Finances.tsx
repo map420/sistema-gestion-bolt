@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { Plus, TrendingUp, TrendingDown, Target, Trash2 } from 'lucide-react';
+import { Plus, TrendingUp, TrendingDown, Target, Trash2, PieChart, AlertTriangle } from 'lucide-react';
 
 interface Transaction {
   id: string;
@@ -99,36 +99,119 @@ export default function Finances() {
       </div>
 
       {activeTab === 'transactions' && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="bg-green-100 p-2 rounded-lg">
-                <TrendingUp className="w-5 h-5 text-green-600" />
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="bg-green-100 p-2 rounded-lg">
+                  <TrendingUp className="w-5 h-5 text-green-600" />
+                </div>
+                <span className="text-sm font-medium text-gray-600">Ingresos</span>
               </div>
-              <span className="text-sm font-medium text-gray-600">Ingresos</span>
+              <div className="text-2xl font-bold text-gray-900">${totalIncome.toFixed(2)}</div>
             </div>
-            <div className="text-2xl font-bold text-gray-900">${totalIncome.toFixed(2)}</div>
+
+            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="bg-red-100 p-2 rounded-lg">
+                  <TrendingDown className="w-5 h-5 text-red-600" />
+                </div>
+                <span className="text-sm font-medium text-gray-600">Gastos</span>
+              </div>
+              <div className="text-2xl font-bold text-gray-900">${totalExpenses.toFixed(2)}</div>
+            </div>
+
+            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="bg-blue-100 p-2 rounded-lg">
+                  <Target className="w-5 h-5 text-blue-600" />
+                </div>
+                <span className="text-sm font-medium text-gray-600">Balance</span>
+              </div>
+              <div className={`text-2xl font-bold ${balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                ${balance.toFixed(2)}
+              </div>
+            </div>
           </div>
 
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="bg-red-100 p-2 rounded-lg">
-                <TrendingDown className="w-5 h-5 text-red-600" />
+          {/* Category Breakdown */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-lg shadow-sm border border-red-200">
+              <div className="p-6 border-b border-red-200">
+                <div className="flex items-center gap-3">
+                  <div className="bg-red-100 p-2 rounded-lg">
+                    <PieChart className="w-5 h-5 text-red-600" />
+                  </div>
+                  <h3 className="font-semibold text-gray-900">Gastos por Categoría</h3>
+                </div>
               </div>
-              <span className="text-sm font-medium text-gray-600">Gastos</span>
-            </div>
-            <div className="text-2xl font-bold text-gray-900">${totalExpenses.toFixed(2)}</div>
-          </div>
+              <div className="p-6">
+                {(() => {
+                  const expensesByCategory = transactions
+                    .filter((t) => t.type === 'expense')
+                    .reduce((acc, t) => {
+                      acc[t.category] = (acc[t.category] || 0) + Number(t.amount);
+                      return acc;
+                    }, {} as Record<string, number>);
 
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="bg-blue-100 p-2 rounded-lg">
-                <Target className="w-5 h-5 text-blue-600" />
+                  const sortedCategories = Object.entries(expensesByCategory)
+                    .sort(([, a], [, b]) => b - a)
+                    .slice(0, 5);
+
+                  return (
+                    <div className="space-y-2">
+                      {sortedCategories.map(([category, amount]) => (
+                        <div key={category}>
+                          <div className="flex items-center justify-between text-sm mb-1">
+                            <span className="text-gray-700 font-medium">{category}</span>
+                            <span className="text-gray-900 font-bold">${amount.toFixed(2)}</span>
+                          </div>
+                          <div className="w-full h-2 bg-red-200 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-gradient-to-r from-red-500 to-orange-500 rounded-full"
+                              style={{ width: `${(amount / (sortedCategories[0]?.[1] || 1)) * 100}%` }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
               </div>
-              <span className="text-sm font-medium text-gray-600">Balance</span>
             </div>
-            <div className={`text-2xl font-bold ${balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              ${balance.toFixed(2)}
+
+            {/* Savings Ratio */}
+            <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-lg shadow-sm border border-blue-200">
+              <div className="p-6 border-b border-blue-200">
+                <div className="flex items-center gap-3">
+                  <div className="bg-blue-100 p-2 rounded-lg">
+                    <Target className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <h3 className="font-semibold text-gray-900">Resumen Financiero</h3>
+                </div>
+              </div>
+              <div className="p-6 space-y-4">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-gray-600">Ratio de Ahorro</span>
+                    <span className="text-lg font-bold text-blue-600">
+                      {totalIncome > 0 ? Math.round(((totalIncome - totalExpenses) / totalIncome) * 100) : 0}%
+                    </span>
+                  </div>
+                  <div className="w-full h-2 bg-blue-200 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-blue-600 rounded-full"
+                      style={{ width: `${totalIncome > 0 ? Math.min(100, ((totalIncome - totalExpenses) / totalIncome) * 100) : 0}%` }}
+                    />
+                  </div>
+                </div>
+                {balance < 0 && (
+                  <div className="flex items-center gap-2 p-3 bg-red-100 border border-red-300 rounded-lg">
+                    <AlertTriangle className="w-4 h-4 text-red-600" />
+                    <span className="text-sm text-red-700">Gastos superiores a ingresos</span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

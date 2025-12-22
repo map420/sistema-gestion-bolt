@@ -12,6 +12,10 @@ import {
   ArrowDown,
   CheckCircle2,
   Zap,
+  Flame,
+  AlertCircle,
+  Calendar,
+  TrendingDown,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 
@@ -260,6 +264,70 @@ export default function Dashboard() {
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600">Tareas completadas hoy</span>
                 <span className="text-2xl font-bold text-indigo-600">{stats?.completedTasksToday}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Insights & Momentum Section */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Spending Velocity */}
+        <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-lg shadow-sm border border-red-200 overflow-hidden">
+          <div className="p-6 border-b border-red-200">
+            <div className="flex items-center gap-3">
+              <div className="bg-red-100 p-2 rounded-lg">
+                <TrendingDown className="w-6 h-6 text-red-600" />
+              </div>
+              <h2 className="text-lg font-semibold text-gray-900">Velocidad de Gasto</h2>
+            </div>
+          </div>
+          <div className="p-6">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">Este mes</span>
+                <span className="text-2xl font-bold text-red-600">${stats?.recentExpenses?.toFixed(2) || '0'}</span>
+              </div>
+              <div className="w-full h-2 bg-red-200 rounded-full overflow-hidden">
+                <div className="h-full bg-red-500 rounded-full" style={{ width: `${Math.min(100, (stats?.recentExpenses || 0) / 100)}%` }}></div>
+              </div>
+              <div className="text-xs text-gray-500">Presupuesto recomendado: considera tu capacidad</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Overall Momentum */}
+        <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg shadow-sm border border-green-200 overflow-hidden">
+          <div className="p-6 border-b border-green-200">
+            <div className="flex items-center gap-3">
+              <div className="bg-green-100 p-2 rounded-lg">
+                <Flame className="w-6 h-6 text-green-600" />
+              </div>
+              <h2 className="text-lg font-semibold text-gray-900">Momentum General</h2>
+            </div>
+          </div>
+          <div className="p-6">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">Score de Actividad</span>
+                <span className="text-2xl font-bold text-green-600">{stats?.habitCompletionRate || 0}%</span>
+              </div>
+              <div className="w-full h-2 bg-green-200 rounded-full overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full" style={{ width: `${stats?.habitCompletionRate || 0}%` }}></div>
+              </div>
+              <div className="grid grid-cols-3 gap-2 text-xs pt-2">
+                <div className="text-center">
+                  <div className="font-bold text-green-600">{stats?.completedHabitsToday}</div>
+                  <div className="text-gray-600">Hoy</div>
+                </div>
+                <div className="text-center">
+                  <div className="font-bold text-blue-600">{stats?.activeHabits}</div>
+                  <div className="text-gray-600">Activos</div>
+                </div>
+                <div className="text-center">
+                  <div className="font-bold text-purple-600">{stats?.completedTasksToday}</div>
+                  <div className="text-gray-600">Tareas</div>
+                </div>
               </div>
             </div>
           </div>
