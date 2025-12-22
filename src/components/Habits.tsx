@@ -32,10 +32,7 @@ export default function Habits() {
   const [habits, setHabits] = useState<Habit[]>([]);
   const [logs, setLogs] = useState<HabitLog[]>([]);
   const [showForm, setShowForm] = useState(false);
-<<<<<<< HEAD
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
-=======
->>>>>>> 265e0a7a03d5ddd6305d485f9603d90120e46fa7
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [loading, setLoading] = useState(true);
 
@@ -351,7 +348,6 @@ export default function Habits() {
   );
 }
 
-<<<<<<< HEAD
 function HabitForm({ editingHabit, onClose, onSuccess }: { editingHabit: Habit | null; onClose: () => void; onSuccess: () => void }) {
   const { user } = useAuth();
   const [formData, setFormData] = useState({
