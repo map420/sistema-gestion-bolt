@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { Plus, Users, Mail, Phone, Briefcase, Calendar, Trash2, AlertCircle, Clock, TrendingUp } from 'lucide-react';
+import { Plus, Users, Mail, Phone, Briefcase, Calendar, Trash2, AlertCircle } from 'lucide-react';
 
 interface Contact {
   id: string;
@@ -22,7 +22,7 @@ export default function Contacts() {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [upcomingFollowUps, setUpcomingFollowUps] = useState<Contact[]>([]);
   const [showForm, setShowForm] = useState(false);
-  const [editingContact, setEditingContact] = useState<Contact | null>(null);
+  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -70,7 +70,7 @@ export default function Contacts() {
         </div>
         <button
           onClick={() => {
-            setEditingContact(null);
+            setSelectedContact(null);
             setShowForm(true);
           }}
           className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
@@ -150,11 +150,15 @@ export default function Contacts() {
                 return (
                   <div
                     key={contact.id}
-                    className={`p-4 border rounded-lg transition ${
+                    className={`p-4 border rounded-lg transition cursor-pointer ${
                       isUpcoming
                         ? 'border-orange-300 bg-orange-50'
                         : 'border-gray-200 hover:border-blue-300'
                     }`}
+                    onClick={() => {
+                      setSelectedContact(contact);
+                      setShowForm(true);
+                    }}
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div>
@@ -166,27 +170,15 @@ export default function Contacts() {
                           <p className="text-sm text-gray-500">{contact.role}</p>
                         )}
                       </div>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setEditingContact(contact);
-                            setShowForm(true);
-                          }}
-                          className="p-1 text-blue-600 hover:bg-blue-50 rounded transition"
-                        >
-                          ✎
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            deleteContact(contact.id);
-                          }}
-                          className="p-1 text-red-600 hover:bg-red-50 rounded transition"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteContact(contact.id);
+                        }}
+                        className="p-1 text-red-600 hover:bg-red-50 rounded transition"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
 
                     <div className="space-y-2 text-sm">
@@ -232,14 +224,14 @@ export default function Contacts() {
 
       {showForm && (
         <ContactForm
-          editingContact={editingContact}
+          contact={selectedContact}
           onClose={() => {
             setShowForm(false);
-            setEditingContact(null);
+            setSelectedContact(null);
           }}
           onSuccess={() => {
             setShowForm(false);
-            setEditingContact(null);
+            setSelectedContact(null);
             loadContacts();
           }}
         />
@@ -249,25 +241,25 @@ export default function Contacts() {
 }
 
 function ContactForm({
-  editingContact,
+  contact,
   onClose,
   onSuccess,
 }: {
-  editingContact?: Contact | null;
+  contact: Contact | null;
   onClose: () => void;
   onSuccess: () => void;
 }) {
   const { user } = useAuth();
   const [formData, setFormData] = useState({
-    name: editingContact?.name || '',
-    company: editingContact?.company || '',
-    role: editingContact?.role || '',
-    email: editingContact?.email || '',
-    phone: editingContact?.phone || '',
-    industry: editingContact?.industry || '',
-    last_contact: editingContact?.last_contact || '',
-    next_contact: editingContact?.next_contact || '',
-    notes: editingContact?.notes || '',
+    name: contact?.name || '',
+    company: contact?.company || '',
+    role: contact?.role || '',
+    email: contact?.email || '',
+    phone: contact?.phone || '',
+    industry: contact?.industry || '',
+    last_contact: contact?.last_contact || '',
+    next_contact: contact?.next_contact || '',
+    notes: contact?.notes || '',
   });
 
   async function handleSubmit(e: React.FormEvent) {
@@ -287,11 +279,11 @@ function ContactForm({
       notes: formData.notes || null,
     };
 
-    if (editingContact) {
+    if (contact) {
       await supabase
         .from('professional_contacts')
         .update(data)
-        .eq('id', editingContact.id);
+        .eq('id', contact.id);
     } else {
       await supabase.from('professional_contacts').insert([data]);
     }
@@ -303,7 +295,7 @@ function ContactForm({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 overflow-y-auto">
       <div className="bg-white rounded-lg max-w-2xl w-full p-6 my-8">
         <h2 className="text-xl font-bold text-gray-900 mb-4">
-          {editingContact ? 'Editar Contacto' : 'Nuevo Contacto'}
+          {contact ? 'Editar Contacto' : 'Nuevo Contacto'}
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -420,7 +412,7 @@ function ContactForm({
               type="submit"
               className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
             >
-              {editingContact ? 'Actualizar' : 'Guardar'}
+              {contact ? 'Actualizar' : 'Guardar'}
             </button>
           </div>
         </form>

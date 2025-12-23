@@ -3,14 +3,15 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import {
   DollarSign,
+  BookOpen,
+  Users,
+  Target,
+  FolderKanban,
   TrendingUp,
   ArrowUp,
   ArrowDown,
   CheckCircle2,
   Zap,
-  Flame,
-  AlertCircle,
-  TrendingDown,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 
@@ -43,11 +44,9 @@ export default function Dashboard() {
 
     try {
       const today = new Date().toISOString().split('T')[0];
-      const todayStart = `${today}T00:00:00`;
       const firstDayOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1)
         .toISOString()
         .split('T')[0];
-      const firstDayOfMonthStart = `${firstDayOfMonth}T00:00:00`;
 
       const [
         { count: transactionsCount },
@@ -105,7 +104,7 @@ export default function Dashboard() {
           .select('*', { count: 'exact', head: true })
           .eq('user_id', user.id)
           .eq('status', 'done')
-          .gte('created_at', todayStart),
+          .gte('created_at', today),
         supabase
           .from('habit_logs')
           .select('completed')
@@ -236,94 +235,54 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Objetivos Activos */}
+        {/* Objetivos y Proyectos */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
           <div className="p-6 border-b border-gray-100">
             <div className="flex items-center gap-3">
               <div className="bg-blue-100 p-2 rounded-lg">
                 <Target className="w-6 h-6 text-blue-600" />
               </div>
-              <h2 className="text-lg font-semibold text-gray-900">Objetivos Activos</h2>
+              <h2 className="text-lg font-semibold text-gray-900">Objetivos & Proyectos</h2>
             </div>
           </div>
           <div className="p-6">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Total activos</span>
+                <span className="text-sm text-gray-600">Objetivos activos</span>
                 <span className="text-2xl font-bold text-blue-600">{stats?.objectives}</span>
               </div>
               <div className="h-px bg-gray-100"></div>
-              <div className="space-y-2">
-                <div className="text-sm text-gray-600">Proyectos en curso: <span className="font-bold text-orange-600">{stats?.activeProjects}</span></div>
-                <div className="text-sm text-gray-600">Tareas completadas hoy: <span className="font-bold text-indigo-600">{stats?.completedTasksToday}</span></div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">Proyectos en curso</span>
+                <span className="text-2xl font-bold text-orange-600">{stats?.activeProjects}</span>
+              </div>
+              <div className="h-px bg-gray-100"></div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">Tareas completadas hoy</span>
+                <span className="text-2xl font-bold text-indigo-600">{stats?.completedTasksToday}</span>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Insights & Momentum Section */}
+      {/* Tertiary Metrics - Aprendizaje & Networking (2 Columns) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Spending Velocity */}
-        <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-lg shadow-sm border border-red-200 overflow-hidden">
-          <div className="p-6 border-b border-red-200">
-            <div className="flex items-center gap-3">
-              <div className="bg-red-100 p-2 rounded-lg">
-                <TrendingDown className="w-6 h-6 text-red-600" />
-              </div>
-              <h2 className="text-lg font-semibold text-gray-900">Velocidad de Gasto</h2>
-            </div>
-          </div>
-          <div className="p-6">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Este mes</span>
-                <span className="text-2xl font-bold text-red-600">${stats?.recentExpenses?.toFixed(2) || '0'}</span>
-              </div>
-              <div className="w-full h-2 bg-red-200 rounded-full overflow-hidden">
-                <div className="h-full bg-red-500 rounded-full" style={{ width: `${Math.min(100, (stats?.recentExpenses || 0) / 100)}%` }}></div>
-              </div>
-              <div className="text-xs text-gray-500">Presupuesto recomendado: considera tu capacidad</div>
-            </div>
-          </div>
-        </div>
+        <MetricCard
+          title="Aprendizaje"
+          icon={<BookOpen className="w-6 h-6" />}
+          color="blue"
+          value={stats?.libraryItems || 0}
+          label="recursos"
+        />
 
-        {/* Overall Momentum */}
-        <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg shadow-sm border border-green-200 overflow-hidden">
-          <div className="p-6 border-b border-green-200">
-            <div className="flex items-center gap-3">
-              <div className="bg-green-100 p-2 rounded-lg">
-                <Flame className="w-6 h-6 text-green-600" />
-              </div>
-              <h2 className="text-lg font-semibold text-gray-900">Momentum General</h2>
-            </div>
-          </div>
-          <div className="p-6">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Score de Actividad</span>
-                <span className="text-2xl font-bold text-green-600">{stats?.habitCompletionRate || 0}%</span>
-              </div>
-              <div className="w-full h-2 bg-green-200 rounded-full overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full" style={{ width: `${stats?.habitCompletionRate || 0}%` }}></div>
-              </div>
-              <div className="grid grid-cols-3 gap-2 text-xs pt-2">
-                <div className="text-center">
-                  <div className="font-bold text-green-600">{stats?.completedHabitsToday}</div>
-                  <div className="text-gray-600">Hoy</div>
-                </div>
-                <div className="text-center">
-                  <div className="font-bold text-blue-600">{stats?.activeHabits}</div>
-                  <div className="text-gray-600">Activos</div>
-                </div>
-                <div className="text-center">
-                  <div className="font-bold text-purple-600">{stats?.completedTasksToday}</div>
-                  <div className="text-gray-600">Tareas</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <MetricCard
+          title="Networking"
+          icon={<Users className="w-6 h-6" />}
+          color="purple"
+          value={stats?.contacts || 0}
+          label="contactos"
+        />
       </div>
     </div>
   );
@@ -336,6 +295,36 @@ interface StatCardProps {
   icon: ReactNode;
   color: string;
   children?: ReactNode;
+}
+
+interface MetricCardProps {
+  title: string;
+  icon: ReactNode;
+  color: string;
+  value: number;
+  label: string;
+}
+
+function MetricCard({ title, icon, color, value, label }: MetricCardProps) {
+  const colorClasses: Record<string, string> = {
+    blue: 'bg-blue-100 text-blue-600',
+    purple: 'bg-purple-100 text-purple-600',
+  };
+
+  return (
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      <div className="p-6 border-b border-gray-100">
+        <div className="flex items-center gap-3">
+          <div className={`p-2 rounded-lg ${colorClasses[color]}`}>{icon}</div>
+          <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
+        </div>
+      </div>
+      <div className="p-6">
+        <div className="text-4xl font-bold text-gray-900 mb-2">{value}</div>
+        <div className="text-sm text-gray-500">{label}</div>
+      </div>
+    </div>
+  );
 }
 
 function StatCard({ title, value, subtitle, icon, color, children }: StatCardProps) {

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { Plus, Target, TrendingUp, AlertTriangle, CheckCircle, Trash2, Zap } from 'lucide-react';
+import { Plus, Target, TrendingUp, AlertTriangle, CheckCircle, Trash2 } from 'lucide-react';
 
 interface Objective {
   id: string;
@@ -32,7 +32,7 @@ export default function Objectives() {
   const [keyResults, setKeyResults] = useState<Record<string, KeyResult[]>>({});
   const [showObjectiveForm, setShowObjectiveForm] = useState(false);
   const [showKRForm, setShowKRForm] = useState<string | null>(null);
-  const [editingObjective, setEditingObjective] = useState<Objective | null>(null);
+  const [selectedObjective, setSelectedObjective] = useState<Objective | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -108,7 +108,7 @@ export default function Objectives() {
         </div>
         <button
           onClick={() => {
-            setEditingObjective(null);
+            setSelectedObjective(null);
             setShowObjectiveForm(true);
           }}
           className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
@@ -140,39 +140,6 @@ export default function Objectives() {
           <div className="text-2xl font-bold text-red-600">{stats.atRisk}</div>
         </div>
       </div>
-
-      {/* At-Risk Objectives Alert */}
-      {objectives.some((o) => o.status === 'at_risk') && (
-        <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-lg shadow-sm border border-red-200">
-          <div className="p-6 border-b border-red-200">
-            <div className="flex items-center gap-3">
-              <div className="bg-red-100 p-2 rounded-lg">
-                <AlertTriangle className="w-5 h-5 text-red-600" />
-              </div>
-              <h2 className="text-lg font-semibold text-gray-900">Objetivos en Riesgo</h2>
-            </div>
-          </div>
-          <div className="p-6">
-            <div className="space-y-3">
-              {objectives
-                .filter((o) => o.status === 'at_risk')
-                .map((objective) => (
-                  <div key={objective.id} className="p-3 bg-white border border-red-200 rounded-lg">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="font-medium text-gray-900">{objective.objective}</div>
-                        <div className="text-sm text-red-600 mt-1">Requiere ajustes en KRs</div>
-                      </div>
-                      <span className="px-2 py-1 text-xs font-medium bg-red-100 text-red-700 rounded-full">
-                        {objective.priority}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-            </div>
-          </div>
-        </div>
-      )}
 
       <div className="space-y-4">
         {loading ? (
@@ -255,15 +222,6 @@ export default function Objectives() {
                         {objective.status === 'at_risk' && <AlertTriangle className="w-4 h-4" />}
                         <span className="capitalize">{objective.status.replace('_', ' ')}</span>
                       </div>
-                      <button
-                        onClick={() => {
-                          setEditingObjective(objective);
-                          setShowObjectiveForm(true);
-                        }}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
-                      >
-                        ✎
-                      </button>
                       <button
                         onClick={() => deleteObjective(objective.id)}
                         className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
@@ -366,14 +324,9 @@ export default function Objectives() {
 
       {showObjectiveForm && (
         <ObjectiveForm
-          editingObjective={editingObjective}
-          onClose={() => {
-            setShowObjectiveForm(false);
-            setEditingObjective(null);
-          }}
+          onClose={() => setShowObjectiveForm(false)}
           onSuccess={() => {
             setShowObjectiveForm(false);
-            setEditingObjective(null);
             loadData();
           }}
         />
@@ -393,47 +346,32 @@ export default function Objectives() {
   );
 }
 
-function ObjectiveForm({
-  editingObjective,
-  onClose,
-  onSuccess,
-}: {
-  editingObjective?: Objective | null;
-  onClose: () => void;
-  onSuccess: () => void;
-}) {
+function ObjectiveForm({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
   const { user } = useAuth();
   const [formData, setFormData] = useState({
-    objective: editingObjective?.objective || '',
-    area: (editingObjective?.area || 'personal') as 'personal' | 'professional',
-    period: editingObjective?.period || '',
-    priority: (editingObjective?.priority || 'medium') as 'low' | 'medium' | 'high' | 'critical',
-    status: (editingObjective?.status || 'active') as Objective['status'],
-    description: editingObjective?.description || '',
+    objective: '',
+    area: 'personal' as 'personal' | 'professional',
+    period: '',
+    priority: 'medium' as 'low' | 'medium' | 'high' | 'critical',
+    status: 'active' as Objective['status'],
+    description: '',
   });
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!user) return;
 
-    const data = {
-      user_id: user.id,
-      objective: formData.objective,
-      area: formData.area,
-      period: formData.period,
-      priority: formData.priority,
-      status: formData.status,
-      description: formData.description || null,
-    };
-
-    if (editingObjective) {
-      await supabase
-        .from('objectives')
-        .update(data)
-        .eq('id', editingObjective.id);
-    } else {
-      await supabase.from('objectives').insert([data]);
-    }
+    await supabase.from('objectives').insert([
+      {
+        user_id: user.id,
+        objective: formData.objective,
+        area: formData.area,
+        period: formData.period,
+        priority: formData.priority,
+        status: formData.status,
+        description: formData.description || null,
+      },
+    ]);
 
     onSuccess();
   }
@@ -441,9 +379,7 @@ function ObjectiveForm({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-lg max-w-2xl w-full p-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">
-          {editingObjective ? 'Editar Objetivo' : 'Nuevo Objetivo'}
-        </h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-4">Nuevo Objetivo</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -537,7 +473,7 @@ function ObjectiveForm({
               type="submit"
               className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
             >
-              {editingObjective ? 'Actualizar' : 'Guardar'}
+              Guardar
             </button>
           </div>
         </form>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { Plus, FolderKanban, AlertCircle, Trash2, CheckSquare, Calendar, TrendingUp, Flag, Zap, BarChart3 } from 'lucide-react';
+import { Plus, FolderKanban, AlertCircle, Trash2, CheckSquare } from 'lucide-react';
 
 interface Project {
   id: string;
@@ -41,9 +41,8 @@ export default function Projects() {
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const [showProjectForm, setShowProjectForm] = useState(false);
   const [showTaskForm, setShowTaskForm] = useState(false);
-  const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState<'projects' | 'kanban' | 'gantt'>('projects');
+  const [view, setView] = useState<'projects' | 'kanban'>('projects');
 
   useEffect(() => {
     loadData();
@@ -111,10 +110,7 @@ export default function Projects() {
         </div>
         <div className="flex gap-2">
           <button
-            onClick={() => {
-              setEditingProject(null);
-              setShowProjectForm(true);
-            }}
+            onClick={() => setShowProjectForm(true)}
             className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
           >
             <Plus className="w-5 h-5" />
@@ -155,98 +151,28 @@ export default function Projects() {
         </div>
       </div>
 
-      {/* Project Health & Upcoming Deadlines */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* At-Risk Projects */}
-        {projects.some((p) => p.status === 'blocked') && (
-          <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-lg shadow-sm border border-red-200">
-            <div className="p-6 border-b border-red-200">
-              <div className="flex items-center gap-3">
-                <div className="bg-red-100 p-2 rounded-lg">
-                  <AlertCircle className="w-5 h-5 text-red-600" />
-                </div>
-                <h3 className="font-semibold text-gray-900">Proyectos Bloqueados</h3>
-              </div>
-            </div>
-            <div className="p-6">
-              <div className="space-y-2">
-                {projects.filter((p) => p.status === 'blocked').map((project) => (
-                  <div key={project.id} className="p-2 bg-white border border-red-200 rounded-lg">
-                    <div className="text-sm font-medium text-gray-900">{project.name}</div>
-                    <div className="text-xs text-red-600">Requiere atención</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Upcoming Deadlines */}
-        {projects.some((p) => p.deadline && new Date(p.deadline) > new Date()) && (
-          <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-lg shadow-sm border border-yellow-200">
-            <div className="p-6 border-b border-yellow-200">
-              <div className="flex items-center gap-3">
-                <div className="bg-yellow-100 p-2 rounded-lg">
-                  <Calendar className="w-5 h-5 text-yellow-600" />
-                </div>
-                <h3 className="font-semibold text-gray-900">Próximas Fechas Límite</h3>
-              </div>
-            </div>
-            <div className="p-6">
-              <div className="space-y-2">
-                {projects
-                  .filter((p) => p.deadline && new Date(p.deadline) > new Date())
-                  .sort((a, b) => (a.deadline || '').localeCompare(b.deadline || ''))
-                  .slice(0, 3)
-                  .map((project) => (
-                    <div key={project.id} className="p-2 bg-white border border-yellow-200 rounded-lg">
-                      <div className="text-sm font-medium text-gray-900">{project.name}</div>
-                      <div className="text-xs text-yellow-600">
-                        {project.deadline && new Date(project.deadline).toLocaleDateString('es-ES')}
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
         <div className="border-b border-gray-200">
           <div className="flex">
             <button
               onClick={() => setView('projects')}
-              className={`px-6 py-3 font-medium transition flex items-center gap-2 ${
+              className={`px-6 py-3 font-medium transition ${
                 view === 'projects'
                   ? 'text-blue-600 border-b-2 border-blue-600'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              <FolderKanban className="w-4 h-4" />
-              Proyectos
+              Vista de Proyectos
             </button>
             <button
               onClick={() => setView('kanban')}
-              className={`px-6 py-3 font-medium transition flex items-center gap-2 ${
+              className={`px-6 py-3 font-medium transition ${
                 view === 'kanban'
                   ? 'text-blue-600 border-b-2 border-blue-600'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              <CheckSquare className="w-4 h-4" />
               Board Kanban
-            </button>
-            <button
-              onClick={() => setView('gantt')}
-              className={`px-6 py-3 font-medium transition flex items-center gap-2 ${
-                view === 'gantt'
-                  ? 'text-blue-600 border-b-2 border-blue-600'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              <BarChart3 className="w-4 h-4" />
-              Timeline
             </button>
           </div>
         </div>
@@ -315,15 +241,6 @@ export default function Projects() {
                           </div>
                         </div>
                         <button
-                          onClick={() => {
-                            setEditingProject(project);
-                            setShowProjectForm(true);
-                          }}
-                          className="p-1 text-blue-600 hover:bg-blue-50 rounded transition"
-                        >
-                          ✎
-                        </button>
-                        <button
                           onClick={() => deleteProject(project.id)}
                           className="p-1 text-red-600 hover:bg-red-50 rounded transition"
                         >
@@ -368,7 +285,7 @@ export default function Projects() {
                 })}
               </div>
             )
-          ) : view === 'kanban' ? (
+          ) : (
             <div>
               {projects.length > 0 && (
                 <div className="mb-4">
@@ -411,22 +328,15 @@ export default function Projects() {
                 />
               </div>
             </div>
-          ) : view === 'gantt' ? (
-            <GanttTimeline projects={projects} />
-          ) : null}
+          )}
         </div>
       </div>
 
       {showProjectForm && (
         <ProjectForm
-          editingProject={editingProject}
-          onClose={() => {
-            setShowProjectForm(false);
-            setEditingProject(null);
-          }}
+          onClose={() => setShowProjectForm(false)}
           onSuccess={() => {
             setShowProjectForm(false);
-            setEditingProject(null);
             loadData();
           }}
         />
@@ -558,53 +468,38 @@ function KanbanColumn({
   );
 }
 
-function ProjectForm({
-  editingProject,
-  onClose,
-  onSuccess,
-}: {
-  editingProject?: Project | null;
-  onClose: () => void;
-  onSuccess: () => void;
-}) {
+function ProjectForm({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
   const { user } = useAuth();
   const [formData, setFormData] = useState({
-    name: editingProject?.name || '',
-    area: (editingProject?.area || 'personal') as 'personal' | 'professional',
-    type: (editingProject?.type || 'personal') as Project['type'],
-    status: (editingProject?.status || 'backlog') as Project['status'],
-    priority: (editingProject?.priority || 'medium') as Project['priority'],
-    start_date: editingProject?.start_date || '',
-    deadline: editingProject?.deadline || '',
-    owner: editingProject?.owner || '',
-    notes: editingProject?.notes || '',
+    name: '',
+    area: 'personal' as 'personal' | 'professional',
+    type: 'personal' as Project['type'],
+    status: 'backlog' as Project['status'],
+    priority: 'medium' as Project['priority'],
+    start_date: '',
+    deadline: '',
+    owner: '',
+    notes: '',
   });
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!user) return;
 
-    const data = {
-      user_id: user.id,
-      name: formData.name,
-      area: formData.area,
-      type: formData.type,
-      status: formData.status,
-      priority: formData.priority,
-      start_date: formData.start_date || null,
-      deadline: formData.deadline || null,
-      owner: formData.owner || null,
-      notes: formData.notes || null,
-    };
-
-    if (editingProject) {
-      await supabase
-        .from('projects')
-        .update(data)
-        .eq('id', editingProject.id);
-    } else {
-      await supabase.from('projects').insert([data]);
-    }
+    await supabase.from('projects').insert([
+      {
+        user_id: user.id,
+        name: formData.name,
+        area: formData.area,
+        type: formData.type,
+        status: formData.status,
+        priority: formData.priority,
+        start_date: formData.start_date || null,
+        deadline: formData.deadline || null,
+        owner: formData.owner || null,
+        notes: formData.notes || null,
+      },
+    ]);
 
     onSuccess();
   }
@@ -612,9 +507,7 @@ function ProjectForm({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 overflow-y-auto">
       <div className="bg-white rounded-lg max-w-2xl w-full p-6 my-8">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">
-          {editingProject ? 'Editar Proyecto' : 'Nuevo Proyecto'}
-        </h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-4">Nuevo Proyecto</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -741,7 +634,7 @@ function ProjectForm({
               type="submit"
               className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
             >
-              {editingProject ? 'Actualizar' : 'Guardar'}
+              Guardar
             </button>
           </div>
         </form>
@@ -900,145 +793,6 @@ function TaskForm({
             </button>
           </div>
         </form>
-      </div>
-    </div>
-  );
-}
-
-function GanttTimeline({ projects }: { projects: Project[] }) {
-  if (projects.length === 0) {
-    return <div className="text-center py-8 text-gray-500">No hay proyectos para mostrar en la timeline.</div>;
-  }
-
-  const today = new Date();
-  
-  // Obtener fechas válidas de los proyectos
-  const validDates = projects
-    .flatMap(p => [
-      p.start_date ? new Date(p.start_date).getTime() : null,
-      p.deadline ? new Date(p.deadline).getTime() : null,
-    ])
-    .filter((d) => d !== null) as number[];
-  
-  if (validDates.length === 0) {
-    return <div className="text-center py-8 text-gray-500">Los proyectos no tienen fechas definidas.</div>;
-  }
-
-  const startDate = new Date(Math.min(...validDates));
-  const endDate = new Date(Math.max(...validDates));
-  
-  // Asegurar que hay al menos 30 días visibles
-  if (endDate.getTime() - startDate.getTime() < 30 * 24 * 60 * 60 * 1000) {
-    endDate.setDate(endDate.getDate() + 30);
-  }
-
-  const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-  const weeks = Math.ceil(totalDays / 7);
-
-  const getProgressPercentage = (project: Project): number => {
-    if (!project.start_date || !project.deadline) return 0;
-    const startTime = new Date(project.start_date).getTime();
-    const endTime = new Date(project.deadline).getTime();
-    const nowTime = today.getTime();
-    
-    if (nowTime < startTime) return 0;
-    if (nowTime > endTime) return 100;
-    
-    return Math.round(((nowTime - startTime) / (endTime - startTime)) * 100);
-  };
-
-  const getDayOffset = (date: string): number => {
-    const projectDate = new Date(date);
-    return Math.floor((projectDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-  };
-
-  const getDayWidth = (startStr: string, endStr: string): number => {
-    const start = getDayOffset(startStr);
-    const end = getDayOffset(endStr) + 1;
-    return Math.max(1, end - start);
-  };
-
-  return (
-    <div className="overflow-x-auto">
-      <div className="min-w-full">
-        {/* Timeline Header */}
-        <div className="flex bg-gray-50 border-b border-gray-200">
-          <div className="w-48 flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-900 border-r border-gray-200">
-            Proyecto
-          </div>
-          <div className="flex flex-1">
-            {Array.from({ length: weeks }).map((_, idx) => {
-              const weekStart = new Date(startDate);
-              weekStart.setDate(weekStart.getDate() + idx * 7);
-              const weekEnd = new Date(weekStart);
-              weekEnd.setDate(weekEnd.getDate() + 6);
-              
-              return (
-                <div key={idx} className="flex-1 px-2 py-2 text-xs font-medium text-gray-600 border-r border-gray-200 min-w-[100px]">
-                  {weekStart.toLocaleDateString('es-ES', { month: 'short', day: 'numeric' })} - {weekEnd.toLocaleDateString('es-ES', { month: 'short', day: 'numeric' })}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Projects */}
-        {projects.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">No hay proyectos para mostrar</div>
-        ) : (
-          projects.map((project) => (
-            <div key={project.id} className="flex border-b border-gray-200 hover:bg-gray-50">
-              <div className="w-48 flex-shrink-0 px-4 py-3 text-sm border-r border-gray-200">
-                <div className="font-medium text-gray-900 truncate">{project.name}</div>
-                <div className="text-xs text-gray-500 mt-1">
-                  {project.status === 'in_progress' && <span className="inline-block px-2 py-1 bg-blue-100 text-blue-700 rounded">En curso</span>}
-                  {project.status === 'completed' && <span className="inline-block px-2 py-1 bg-green-100 text-green-700 rounded">Completado</span>}
-                  {project.status === 'blocked' && <span className="inline-block px-2 py-1 bg-red-100 text-red-700 rounded">Bloqueado</span>}
-                </div>
-              </div>
-              <div className="flex flex-1 relative items-center py-3">
-                {/* Gantt bar background */}
-                {project.start_date && project.deadline && (
-                  <div
-                    className="absolute h-6 bg-gradient-to-r from-blue-400 to-blue-500 rounded-lg opacity-80 group hover:opacity-100 transition"
-                    style={{
-                      left: `${(getDayOffset(project.start_date) / totalDays) * 100}%`,
-                      width: `${(getDayWidth(project.start_date, project.deadline) / totalDays) * 100}%`,
-                    }}
-                  >
-                    <div
-                      className="h-full bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg"
-                      style={{ width: `${getProgressPercentage(project)}%` }}
-                    />
-                  </div>
-                )}
-                {/* Week dividers */}
-                {Array.from({ length: weeks - 1 }).map((_, idx) => (
-                  <div
-                    key={idx}
-                    className="absolute border-l border-gray-200 h-6"
-                    style={{ left: `${((idx + 1) * 7 / totalDays) * 100}%` }}
-                  />
-                ))}
-              </div>
-            </div>
-          ))
-        )}
-      </div>
-
-      {/* Legend */}
-      <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-        <div className="text-xs font-medium text-gray-600 mb-2">Leyenda:</div>
-        <div className="space-y-1 text-xs text-gray-600">
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-gradient-to-r from-blue-400 to-blue-500 rounded"></div>
-            <span>Barra de progreso del proyecto</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-gradient-to-r from-blue-600 to-blue-700 rounded"></div>
-            <span>Progreso completado</span>
-          </div>
-        </div>
       </div>
     </div>
   );
