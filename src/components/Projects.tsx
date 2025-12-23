@@ -416,6 +416,8 @@ export default function Projects() {
           ) : null}
         </div>
       </div>
+
+      {showProjectForm && (
         <ProjectForm
           editingProject={editingProject}
           onClose={() => {
