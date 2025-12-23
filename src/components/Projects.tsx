@@ -248,13 +248,6 @@ export default function Projects() {
               <BarChart3 className="w-4 h-4" />
               Timeline
             </button>
-                view === 'kanban'
-                  ? 'text-blue-600 border-b-2 border-blue-600'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              Board Kanban
-            </button>
           </div>
         </div>
 
@@ -421,8 +414,8 @@ export default function Projects() {
           ) : view === 'gantt' ? (
             <GanttTimeline projects={projects} />
           ) : null}
-
-      {showProjectForm && (
+        </div>
+      </div>
         <ProjectForm
           editingProject={editingProject}
           onClose={() => {
