@@ -43,9 +43,11 @@ export default function Dashboard() {
 
     try {
       const today = new Date().toISOString().split('T')[0];
+      const todayStart = `${today}T00:00:00`;
       const firstDayOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1)
         .toISOString()
         .split('T')[0];
+      const firstDayOfMonthStart = `${firstDayOfMonth}T00:00:00`;
 
       const [
         { count: transactionsCount },
@@ -103,7 +105,7 @@ export default function Dashboard() {
           .select('*', { count: 'exact', head: true })
           .eq('user_id', user.id)
           .eq('status', 'done')
-          .gte('created_at', today),
+          .gte('created_at', todayStart),
         supabase
           .from('habit_logs')
           .select('completed')
