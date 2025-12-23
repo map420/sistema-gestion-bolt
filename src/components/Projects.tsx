@@ -34,13 +34,6 @@ interface Task {
   blockers: string | null;
 }
 
-interface Sprint {
-  id: string;
-  name: string;
-  start_date: string | null;
-  end_date: string | null;
-}
-
 export default function Projects() {
   const { user } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
@@ -49,9 +42,7 @@ export default function Projects() {
   const [showProjectForm, setShowProjectForm] = useState(false);
   const [showTaskForm, setShowTaskForm] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState<'projects' | 'kanban' | 'gantt'>('projects');
-  const [sprints, setSprints] = useState<Sprint[]>([]);
-  const [showSprintForm, setShowSprintForm] = useState(false);
+  const [view, setView] = useState<'projects' | 'kanban'>('projects');
 
   useEffect(() => {
     loadData();
@@ -126,23 +117,13 @@ export default function Projects() {
             Nuevo proyecto
           </button>
           {view === 'kanban' && (
-            <>
-              <button
-                onClick={() => setShowTaskForm(true)}
-                className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
-              >
-                <Plus className="w-5 h-5" />
-                Nueva tarea
-              </button>
-
-              <button
-                onClick={() => setShowSprintForm(true)}
-                className="flex items-center gap-2 bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition"
-              >
-                <Plus className="w-5 h-5" />
-                Nuevo sprint
-              </button>
-            </>
+            <button
+              onClick={() => setShowTaskForm(true)}
+              className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
+            >
+              <Plus className="w-5 h-5" />
+              Nueva tarea
+            </button>
           )}
         </div>
       </div>
@@ -192,17 +173,6 @@ export default function Projects() {
               }`}
             >
               Board Kanban
-            </button>
-
-            <button
-              onClick={() => setView('gantt')}
-              className={`px-6 py-3 font-medium transition ${
-                view === 'gantt'
-                  ? 'text-blue-600 border-b-2 border-blue-600'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              Gantt
             </button>
           </div>
         </div>
@@ -315,7 +285,7 @@ export default function Projects() {
                 })}
               </div>
             )
-          ) : view === 'kanban' ? (
+          ) : (
             <div>
               {projects.length > 0 && (
                 <div className="mb-4">
@@ -358,9 +328,7 @@ export default function Projects() {
                 />
               </div>
             </div>
-          ) : view === 'gantt' ? (
-            <GanttTimeline projects={projects} tasks={tasks} />
-          ) : null}
+          )}
         </div>
       </div>
 
@@ -377,21 +345,10 @@ export default function Projects() {
       {showTaskForm && (
         <TaskForm
           projects={projects}
-          sprints={sprints}
           onClose={() => setShowTaskForm(false)}
           onSuccess={() => {
             setShowTaskForm(false);
             loadData();
-          }}
-        />
-      )}
-
-      {showSprintForm && (
-        <SprintForm
-          onClose={() => setShowSprintForm(false)}
-          onCreate={(s) => {
-            setSprints((prev) => [...prev, s]);
-            setShowSprintForm(false);
           }}
         />
       )}
@@ -688,12 +645,10 @@ function ProjectForm({ onClose, onSuccess }: { onClose: () => void; onSuccess: (
 
 function TaskForm({
   projects,
-  sprints,
   onClose,
   onSuccess,
 }: {
   projects: Project[];
-  sprints: Sprint[];
   onClose: () => void;
   onSuccess: () => void;
 }) {
@@ -706,7 +661,6 @@ function TaskForm({
     estimation: '',
     deadline: '',
     blockers: '',
-    sprint: '',
   });
 
   async function handleSubmit(e: React.FormEvent) {
@@ -723,7 +677,6 @@ function TaskForm({
         estimation: formData.estimation ? parseInt(formData.estimation) : null,
         deadline: formData.deadline || null,
         blockers: formData.blockers || null,
-        sprint: formData.sprint || null,
       },
     ]);
 
@@ -758,22 +711,6 @@ function TaskForm({
               {projects.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Sprint (opcional)</label>
-            <select
-              value={formData.sprint}
-              onChange={(e) => setFormData({ ...formData, sprint: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-            >
-              <option value="">Sin sprint</option>
-              {sprints.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
                 </option>
               ))}
             </select>
@@ -856,153 +793,6 @@ function TaskForm({
             </button>
           </div>
         </form>
-      </div>
-    </div>
-  );
-}
-
-function SprintForm({ onClose, onCreate }: { onClose: () => void; onCreate: (s: Sprint) => void }) {
-  const [form, setForm] = useState({ name: '', start_date: '', end_date: '' });
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const sprint: Sprint = {
-      id: Date.now().toString(),
-      name: form.name || `Sprint ${new Date().toLocaleDateString()}`,
-      start_date: form.start_date || null,
-      end_date: form.end_date || null,
-    };
-    onCreate(sprint);
-  }
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg max-w-md w-full p-6">
-        <h2 className="text-lg font-bold mb-4">Nuevo Sprint</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
-            <input
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm text-gray-700 mb-1">Inicio</label>
-              <input
-                type="date"
-                value={form.start_date}
-                onChange={(e) => setForm({ ...form, start_date: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-gray-700 mb-1">Fin</label>
-              <input
-                type="date"
-                value={form.end_date}
-                onChange={(e) => setForm({ ...form, end_date: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-              />
-            </div>
-          </div>
-
-          <div className="flex gap-3 pt-4">
-            <button type="button" onClick={onClose} className="flex-1 px-4 py-2 border rounded">
-              Cancelar
-            </button>
-            <button type="submit" className="flex-1 px-4 py-2 bg-yellow-600 text-white rounded">
-              Crear
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-}
-
-function GanttTimeline({ projects, tasks }: { projects: Project[]; tasks: Task[] }) {
-  // compute date range
-  const toDate = (d?: string | null) => (d ? new Date(d) : null);
-  const dates: Date[] = [];
-  projects.forEach((p) => {
-    const s = toDate(p.start_date);
-    const e = toDate(p.deadline);
-    if (s) dates.push(s);
-    if (e) dates.push(e);
-  });
-  tasks.forEach((t) => {
-    const d = toDate(t.deadline);
-    if (d) dates.push(d);
-  });
-
-  if (dates.length === 0) {
-    return <div className="p-6 text-gray-500">No hay fechas para mostrar en Gantt</div>;
-  }
-
-  const min = new Date(Math.min(...dates.map((d) => d.getTime())));
-  const max = new Date(Math.max(...dates.map((d) => d.getTime())));
-  // limit span to reasonable number of days
-  const spanDays = Math.min(90, Math.max(7, Math.ceil((max.getTime() - min.getTime()) / (1000 * 60 * 60 * 24))));
-
-  function daysBetween(start: Date, d: Date) {
-    return Math.round((d.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-  }
-
-  const gridCols = spanDays;
-
-  return (
-    <div className="overflow-auto p-4">
-      <div className="text-xs text-gray-500 mb-3">Rango: {min.toLocaleDateString()} — {new Date(min.getTime() + spanDays * 24 * 60 * 60 * 1000).toLocaleDateString()}</div>
-      <div className="min-w-full">
-        <div className="grid grid-cols-12 gap-1 text-xs text-gray-400 mb-2">
-          {Array.from({ length: Math.min(gridCols, 28) }).map((_, i) => (
-            <div key={i} className="text-center">{new Date(min.getTime() + i * 24 * 60 * 60 * 1000).toLocaleDateString()}</div>
-          ))}
-        </div>
-
-        <div className="space-y-3">
-          {projects.map((p) => {
-            const pStart = toDate(p.start_date) || min;
-            const pEnd = toDate(p.deadline) || new Date(min.getTime() + 7 * 24 * 60 * 60 * 1000);
-            const left = Math.max(0, daysBetween(min, pStart));
-            const width = Math.max(1, daysBetween(pStart, pEnd));
-
-            const projectTasks = tasks.filter((t) => t.project_id === p.id && t.deadline);
-
-            return (
-              <div key={p.id} className="bg-white p-3 rounded-lg border border-gray-200">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="font-medium text-gray-900">{p.name}</div>
-                  <div className="text-xs text-gray-500">{pStart.toLocaleDateString()} → {pEnd.toLocaleDateString()}</div>
-                </div>
-
-                <div className="relative h-8 bg-gray-50 rounded overflow-hidden">
-                  <div
-                    className="absolute top-1 left-0 h-6 bg-blue-400 rounded"
-                    style={{ left: `${(left / spanDays) * 100}%`, width: `${(width / spanDays) * 100}%` }}
-                  />
-
-                  {projectTasks.map((t) => {
-                    const td = toDate(t.deadline)!;
-                    const pos = daysBetween(min, td);
-                    return (
-                      <div
-                        key={t.id}
-                        className="absolute top-0 h-2 bg-yellow-600 rounded"
-                        title={t.task}
-                        style={{ left: `${(pos / spanDays) * 100}%`, width: '0.6%' }}
-                      />
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })}
-        </div>
       </div>
     </div>
   );

@@ -1,7 +1,18 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { DollarSign, BookOpen, Users, FolderKanban, TrendingUp, ArrowUp, ArrowDown, CheckCircle2 } from 'lucide-react';
+import {
+  DollarSign,
+  BookOpen,
+  Users,
+  Target,
+  FolderKanban,
+  TrendingUp,
+  ArrowUp,
+  ArrowDown,
+  CheckCircle2,
+  Zap,
+} from 'lucide-react';
 import type { ReactNode } from 'react';
 
 interface Stats {
@@ -255,43 +266,23 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Compact secondary row: Projects / Tasks / Habits */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-sm font-medium text-gray-600">Proyectos activos</h3>
-              <div className="text-2xl font-bold text-gray-900">{stats?.activeProjects}</div>
-            </div>
-            <div className="p-2 rounded-lg bg-blue-100 text-blue-600">
-              <FolderKanban className="w-6 h-6" />
-            </div>
-          </div>
-        </div>
+      {/* Tertiary Metrics - Aprendizaje & Networking (2 Columns) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <MetricCard
+          title="Aprendizaje"
+          icon={<BookOpen className="w-6 h-6" />}
+          color="blue"
+          value={stats?.libraryItems || 0}
+          label="recursos"
+        />
 
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-sm font-medium text-gray-600">Tareas completadas hoy</h3>
-              <div className="text-2xl font-bold text-gray-900">{stats?.completedTasksToday}</div>
-            </div>
-            <div className="p-2 rounded-lg bg-indigo-100 text-indigo-600">
-              <CheckCircle2 className="w-6 h-6" />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-sm font-medium text-gray-600">Hábitos - cumplimiento</h3>
-              <div className="text-2xl font-bold text-gray-900">{stats?.habitCompletionRate}%</div>
-            </div>
-            <div className="p-2 rounded-lg bg-teal-100 text-teal-600">
-              <TrendingUp className="w-6 h-6" />
-            </div>
-          </div>
-        </div>
+        <MetricCard
+          title="Networking"
+          icon={<Users className="w-6 h-6" />}
+          color="purple"
+          value={stats?.contacts || 0}
+          label="contactos"
+        />
       </div>
     </div>
   );
