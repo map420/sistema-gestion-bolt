@@ -906,9 +906,26 @@ function TaskForm({
 }
 
 function GanttTimeline({ projects }: { projects: Project[] }) {
+  if (projects.length === 0) {
+    return <div className="text-center py-8 text-gray-500">No hay proyectos para mostrar en la timeline.</div>;
+  }
+
   const today = new Date();
-  const startDate = new Date(Math.min(...projects.map(p => p.start_date ? new Date(p.start_date).getTime() : today.getTime())));
-  const endDate = new Date(Math.max(...projects.map(p => p.deadline ? new Date(p.deadline).getTime() : today.getTime())));
+  
+  // Obtener fechas válidas de los proyectos
+  const validDates = projects
+    .flatMap(p => [
+      p.start_date ? new Date(p.start_date).getTime() : null,
+      p.deadline ? new Date(p.deadline).getTime() : null,
+    ])
+    .filter((d) => d !== null) as number[];
+  
+  if (validDates.length === 0) {
+    return <div className="text-center py-8 text-gray-500">Los proyectos no tienen fechas definidas.</div>;
+  }
+
+  const startDate = new Date(Math.min(...validDates));
+  const endDate = new Date(Math.max(...validDates));
   
   // Asegurar que hay al menos 30 días visibles
   if (endDate.getTime() - startDate.getTime() < 30 * 24 * 60 * 60 * 1000) {
