@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { Plus, FolderKanban, AlertCircle, Trash2, CheckSquare, Calendar, TrendingUp, Flag } from 'lucide-react';
+import { Plus, FolderKanban, AlertCircle, Trash2, CheckSquare, Calendar, TrendingUp, Flag, Zap, BarChart3 } from 'lucide-react';
 
 interface Project {
   id: string;
@@ -43,7 +43,7 @@ export default function Projects() {
   const [showTaskForm, setShowTaskForm] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState<'projects' | 'kanban'>('projects');
+  const [view, setView] = useState<'projects' | 'kanban' | 'gantt'>('projects');
 
   useEffect(() => {
     loadData();
@@ -217,17 +217,37 @@ export default function Projects() {
           <div className="flex">
             <button
               onClick={() => setView('projects')}
-              className={`px-6 py-3 font-medium transition ${
+              className={`px-6 py-3 font-medium transition flex items-center gap-2 ${
                 view === 'projects'
                   ? 'text-blue-600 border-b-2 border-blue-600'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              Vista de Proyectos
+              <FolderKanban className="w-4 h-4" />
+              Proyectos
             </button>
             <button
               onClick={() => setView('kanban')}
-              className={`px-6 py-3 font-medium transition ${
+              className={`px-6 py-3 font-medium transition flex items-center gap-2 ${
+                view === 'kanban'
+                  ? 'text-blue-600 border-b-2 border-blue-600'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <CheckSquare className="w-4 h-4" />
+              Board Kanban
+            </button>
+            <button
+              onClick={() => setView('gantt')}
+              className={`px-6 py-3 font-medium transition flex items-center gap-2 ${
+                view === 'gantt'
+                  ? 'text-blue-600 border-b-2 border-blue-600'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <BarChart3 className="w-4 h-4" />
+              Timeline
+            </button>
                 view === 'kanban'
                   ? 'text-blue-600 border-b-2 border-blue-600'
                   : 'text-gray-600 hover:text-gray-900'
@@ -398,9 +418,9 @@ export default function Projects() {
                 />
               </div>
             </div>
-          )}
-        </div>
-      </div>
+          ) : view === 'gantt' ? (
+            <GanttTimeline projects={projects} />
+          ) : null}
 
       {showProjectForm && (
         <ProjectForm
@@ -885,6 +905,128 @@ function TaskForm({
             </button>
           </div>
         </form>
+      </div>
+    </div>
+  );
+}
+
+function GanttTimeline({ projects }: { projects: Project[] }) {
+  const today = new Date();
+  const startDate = new Date(Math.min(...projects.map(p => p.start_date ? new Date(p.start_date).getTime() : today.getTime())));
+  const endDate = new Date(Math.max(...projects.map(p => p.deadline ? new Date(p.deadline).getTime() : today.getTime())));
+  
+  // Asegurar que hay al menos 30 días visibles
+  if (endDate.getTime() - startDate.getTime() < 30 * 24 * 60 * 60 * 1000) {
+    endDate.setDate(endDate.getDate() + 30);
+  }
+
+  const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+  const weeks = Math.ceil(totalDays / 7);
+
+  const getProgressPercentage = (project: Project): number => {
+    if (!project.start_date || !project.deadline) return 0;
+    const startTime = new Date(project.start_date).getTime();
+    const endTime = new Date(project.deadline).getTime();
+    const nowTime = today.getTime();
+    
+    if (nowTime < startTime) return 0;
+    if (nowTime > endTime) return 100;
+    
+    return Math.round(((nowTime - startTime) / (endTime - startTime)) * 100);
+  };
+
+  const getDayOffset = (date: string): number => {
+    const projectDate = new Date(date);
+    return Math.floor((projectDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+  };
+
+  const getDayWidth = (startStr: string, endStr: string): number => {
+    const start = getDayOffset(startStr);
+    const end = getDayOffset(endStr) + 1;
+    return Math.max(1, end - start);
+  };
+
+  return (
+    <div className="overflow-x-auto">
+      <div className="min-w-full">
+        {/* Timeline Header */}
+        <div className="flex bg-gray-50 border-b border-gray-200">
+          <div className="w-48 flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-900 border-r border-gray-200">
+            Proyecto
+          </div>
+          <div className="flex flex-1">
+            {Array.from({ length: weeks }).map((_, idx) => {
+              const weekStart = new Date(startDate);
+              weekStart.setDate(weekStart.getDate() + idx * 7);
+              const weekEnd = new Date(weekStart);
+              weekEnd.setDate(weekEnd.getDate() + 6);
+              
+              return (
+                <div key={idx} className="flex-1 px-2 py-2 text-xs font-medium text-gray-600 border-r border-gray-200 min-w-[100px]">
+                  {weekStart.toLocaleDateString('es-ES', { month: 'short', day: 'numeric' })} - {weekEnd.toLocaleDateString('es-ES', { month: 'short', day: 'numeric' })}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Projects */}
+        {projects.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">No hay proyectos para mostrar</div>
+        ) : (
+          projects.map((project) => (
+            <div key={project.id} className="flex border-b border-gray-200 hover:bg-gray-50">
+              <div className="w-48 flex-shrink-0 px-4 py-3 text-sm border-r border-gray-200">
+                <div className="font-medium text-gray-900 truncate">{project.name}</div>
+                <div className="text-xs text-gray-500 mt-1">
+                  {project.status === 'in_progress' && <span className="inline-block px-2 py-1 bg-blue-100 text-blue-700 rounded">En curso</span>}
+                  {project.status === 'completed' && <span className="inline-block px-2 py-1 bg-green-100 text-green-700 rounded">Completado</span>}
+                  {project.status === 'blocked' && <span className="inline-block px-2 py-1 bg-red-100 text-red-700 rounded">Bloqueado</span>}
+                </div>
+              </div>
+              <div className="flex flex-1 relative items-center py-3">
+                {/* Gantt bar background */}
+                {project.start_date && project.deadline && (
+                  <div
+                    className="absolute h-6 bg-gradient-to-r from-blue-400 to-blue-500 rounded-lg opacity-80 group hover:opacity-100 transition"
+                    style={{
+                      left: `${(getDayOffset(project.start_date) / totalDays) * 100}%`,
+                      width: `${(getDayWidth(project.start_date, project.deadline) / totalDays) * 100}%`,
+                    }}
+                  >
+                    <div
+                      className="h-full bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg"
+                      style={{ width: `${getProgressPercentage(project)}%` }}
+                    />
+                  </div>
+                )}
+                {/* Week dividers */}
+                {Array.from({ length: weeks - 1 }).map((_, idx) => (
+                  <div
+                    key={idx}
+                    className="absolute border-l border-gray-200 h-6"
+                    style={{ left: `${((idx + 1) * 7 / totalDays) * 100}%` }}
+                  />
+                ))}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Legend */}
+      <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+        <div className="text-xs font-medium text-gray-600 mb-2">Leyenda:</div>
+        <div className="space-y-1 text-xs text-gray-600">
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-gradient-to-r from-blue-400 to-blue-500 rounded"></div>
+            <span>Barra de progreso del proyecto</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-gradient-to-r from-blue-600 to-blue-700 rounded"></div>
+            <span>Progreso completado</span>
+          </div>
+        </div>
       </div>
     </div>
   );

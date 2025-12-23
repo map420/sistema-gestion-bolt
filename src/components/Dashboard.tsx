@@ -3,10 +3,6 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import {
   DollarSign,
-  BookOpen,
-  Users,
-  Target,
-  FolderKanban,
   TrendingUp,
   ArrowUp,
   ArrowDown,
@@ -14,7 +10,6 @@ import {
   Zap,
   Flame,
   AlertCircle,
-  Calendar,
   TrendingDown,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
@@ -239,31 +234,26 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Objetivos y Proyectos */}
+        {/* Objetivos Activos */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
           <div className="p-6 border-b border-gray-100">
             <div className="flex items-center gap-3">
               <div className="bg-blue-100 p-2 rounded-lg">
                 <Target className="w-6 h-6 text-blue-600" />
               </div>
-              <h2 className="text-lg font-semibold text-gray-900">Objetivos & Proyectos</h2>
+              <h2 className="text-lg font-semibold text-gray-900">Objetivos Activos</h2>
             </div>
           </div>
           <div className="p-6">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Objetivos activos</span>
+                <span className="text-sm text-gray-600">Total activos</span>
                 <span className="text-2xl font-bold text-blue-600">{stats?.objectives}</span>
               </div>
               <div className="h-px bg-gray-100"></div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Proyectos en curso</span>
-                <span className="text-2xl font-bold text-orange-600">{stats?.activeProjects}</span>
-              </div>
-              <div className="h-px bg-gray-100"></div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Tareas completadas hoy</span>
-                <span className="text-2xl font-bold text-indigo-600">{stats?.completedTasksToday}</span>
+              <div className="space-y-2">
+                <div className="text-sm text-gray-600">Proyectos en curso: <span className="font-bold text-orange-600">{stats?.activeProjects}</span></div>
+                <div className="text-sm text-gray-600">Tareas completadas hoy: <span className="font-bold text-indigo-600">{stats?.completedTasksToday}</span></div>
               </div>
             </div>
           </div>
@@ -333,25 +323,6 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-
-      {/* Tertiary Metrics - Aprendizaje & Networking (2 Columns) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <MetricCard
-          title="Aprendizaje"
-          icon={<BookOpen className="w-6 h-6" />}
-          color="blue"
-          value={stats?.libraryItems || 0}
-          label="recursos"
-        />
-
-        <MetricCard
-          title="Networking"
-          icon={<Users className="w-6 h-6" />}
-          color="purple"
-          value={stats?.contacts || 0}
-          label="contactos"
-        />
-      </div>
     </div>
   );
 }
@@ -363,36 +334,6 @@ interface StatCardProps {
   icon: ReactNode;
   color: string;
   children?: ReactNode;
-}
-
-interface MetricCardProps {
-  title: string;
-  icon: ReactNode;
-  color: string;
-  value: number;
-  label: string;
-}
-
-function MetricCard({ title, icon, color, value, label }: MetricCardProps) {
-  const colorClasses: Record<string, string> = {
-    blue: 'bg-blue-100 text-blue-600',
-    purple: 'bg-purple-100 text-purple-600',
-  };
-
-  return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-      <div className="p-6 border-b border-gray-100">
-        <div className="flex items-center gap-3">
-          <div className={`p-2 rounded-lg ${colorClasses[color]}`}>{icon}</div>
-          <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
-        </div>
-      </div>
-      <div className="p-6">
-        <div className="text-4xl font-bold text-gray-900 mb-2">{value}</div>
-        <div className="text-sm text-gray-500">{label}</div>
-      </div>
-    </div>
-  );
 }
 
 function StatCard({ title, value, subtitle, icon, color, children }: StatCardProps) {
