@@ -368,7 +368,7 @@ export default function Projects() {
                 })}
               </div>
             )
-          ) : (
+          ) : view === 'kanban' ? (
             <div>
               {projects.length > 0 && (
                 <div className="mb-4">
