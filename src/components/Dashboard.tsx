@@ -10,7 +10,10 @@ import {
   TrendingUp,
   ArrowUp,
   ArrowDown,
+  CheckCircle2,
+  Zap,
 } from 'lucide-react';
+import type { ReactNode } from 'react';
 
 interface Stats {
   transactions: number;
@@ -22,6 +25,9 @@ interface Stats {
   activeProjects: number;
   activeHabits: number;
   completedTasksToday: number;
+  completedHabitsToday: number;
+  habitCompletionRate: number;
+  balance: number;
 }
 
 export default function Dashboard() {
@@ -52,6 +58,7 @@ export default function Dashboard() {
         { count: projectsCount },
         { count: habitsCount },
         { count: tasksCount },
+        { data: habitLogsData },
       ] = await Promise.all([
         supabase
           .from('transactions')
@@ -98,10 +105,19 @@ export default function Dashboard() {
           .eq('user_id', user.id)
           .eq('status', 'done')
           .gte('created_at', today),
+        supabase
+          .from('habit_logs')
+          .select('completed')
+          .eq('user_id', user.id)
+          .eq('log_date', today),
       ]);
 
       const totalIncome = incomeData?.reduce((sum, t) => sum + Number(t.amount), 0) || 0;
       const totalExpenses = expenseData?.reduce((sum, t) => sum + Number(t.amount), 0) || 0;
+      const completedHabitsCount = habitLogsData?.filter((log) => log.completed).length || 0;
+      const habitCompletionRate =
+        habitsCount && habitsCount > 0 ? Math.round((completedHabitsCount / habitsCount) * 100) : 0;
+      const balance = totalIncome - totalExpenses;
 
       setStats({
         transactions: transactionsCount || 0,
@@ -113,6 +129,9 @@ export default function Dashboard() {
         activeProjects: projectsCount || 0,
         activeHabits: habitsCount || 0,
         completedTasksToday: tasksCount || 0,
+        completedHabitsToday: completedHabitsCount,
+        habitCompletionRate,
+        balance,
       });
     } catch (error) {
       console.error('Error loading stats:', error);
@@ -130,82 +149,139 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
         <p className="text-gray-600 mt-1">Vista general de tu sistema de gestión</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
-          title="Finanzas"
-          icon={<DollarSign className="w-6 h-6" />}
-          color="green"
-        >
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <ArrowUp className="w-4 h-4 text-green-600" />
-              <span className="text-sm text-gray-600">Ingresos mes:</span>
-              <span className="text-sm font-semibold text-green-600">
-                ${stats?.recentIncome.toFixed(2)}
-              </span>
+      {/* Primary Metrics - Finanzas (Full Width) */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div className="p-6 border-b border-gray-100">
+          <div className="flex items-center gap-3">
+            <div className="bg-emerald-100 p-2 rounded-lg">
+              <DollarSign className="w-6 h-6 text-emerald-600" />
             </div>
-            <div className="flex items-center gap-2">
-              <ArrowDown className="w-4 h-4 text-red-600" />
-              <span className="text-sm text-gray-600">Gastos mes:</span>
-              <span className="text-sm font-semibold text-red-600">
-                ${stats?.recentExpenses.toFixed(2)}
-              </span>
+            <h2 className="text-lg font-semibold text-gray-900">Finanzas</h2>
+          </div>
+        </div>
+        <div className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Balance */}
+            <div className="flex flex-col">
+              <span className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Balance mes</span>
+              <div className="flex items-baseline gap-2">
+                <span className={`text-3xl font-bold ${stats?.balance! >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                  ${stats?.balance?.toFixed(2)}
+                </span>
+              </div>
+            </div>
+            {/* Income */}
+            <div className="flex flex-col">
+              <span className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Ingresos mes</span>
+              <div className="flex items-baseline gap-2">
+                <ArrowUp className="w-4 h-4 text-emerald-600" />
+                <span className="text-3xl font-bold text-gray-900">${stats?.recentIncome.toFixed(2)}</span>
+              </div>
+            </div>
+            {/* Expenses */}
+            <div className="flex flex-col">
+              <span className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Gastos mes</span>
+              <div className="flex items-baseline gap-2">
+                <ArrowDown className="w-4 h-4 text-red-600" />
+                <span className="text-3xl font-bold text-gray-900">${stats?.recentExpenses.toFixed(2)}</span>
+              </div>
             </div>
           </div>
-        </StatCard>
+        </div>
+      </div>
 
-        <StatCard
+      {/* Secondary Metrics - Productividad (2 Columns) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Hábitos y Rutinas */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <div className="p-6 border-b border-gray-100">
+            <div className="flex items-center gap-3">
+              <div className="bg-teal-100 p-2 rounded-lg">
+                <TrendingUp className="w-6 h-6 text-teal-600" />
+              </div>
+              <h2 className="text-lg font-semibold text-gray-900">Hábitos & Rutinas</h2>
+            </div>
+          </div>
+          <div className="p-6">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">Hábitos activos</span>
+                <span className="text-2xl font-bold text-teal-600">{stats?.activeHabits}</span>
+              </div>
+              <div className="h-px bg-gray-100"></div>
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-gray-600">Cumplimiento hoy</span>
+                  <span className="text-lg font-bold text-gray-900">{stats?.habitCompletionRate}%</span>
+                </div>
+                <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-teal-500 to-emerald-500 rounded-full transition-all duration-500"
+                    style={{ width: `${stats?.habitCompletionRate}%` }}
+                  ></div>
+                </div>
+                <div className="text-xs text-gray-500 mt-2">
+                  {stats?.completedHabitsToday} de {stats?.activeHabits} completados
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Objetivos y Proyectos */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <div className="p-6 border-b border-gray-100">
+            <div className="flex items-center gap-3">
+              <div className="bg-blue-100 p-2 rounded-lg">
+                <Target className="w-6 h-6 text-blue-600" />
+              </div>
+              <h2 className="text-lg font-semibold text-gray-900">Objetivos & Proyectos</h2>
+            </div>
+          </div>
+          <div className="p-6">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">Objetivos activos</span>
+                <span className="text-2xl font-bold text-blue-600">{stats?.objectives}</span>
+              </div>
+              <div className="h-px bg-gray-100"></div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">Proyectos en curso</span>
+                <span className="text-2xl font-bold text-orange-600">{stats?.activeProjects}</span>
+              </div>
+              <div className="h-px bg-gray-100"></div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">Tareas completadas hoy</span>
+                <span className="text-2xl font-bold text-indigo-600">{stats?.completedTasksToday}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Tertiary Metrics - Aprendizaje & Networking (2 Columns) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <MetricCard
           title="Aprendizaje"
-          value={stats?.libraryItems || 0}
-          subtitle="recursos"
           icon={<BookOpen className="w-6 h-6" />}
           color="blue"
+          value={stats?.libraryItems || 0}
+          label="recursos"
         />
 
-        <StatCard
+        <MetricCard
           title="Networking"
-          value={stats?.contacts || 0}
-          subtitle="contactos"
           icon={<Users className="w-6 h-6" />}
           color="purple"
-        />
-
-        <StatCard
-          title="Objetivos"
-          value={stats?.objectives || 0}
-          subtitle="activos"
-          icon={<Target className="w-6 h-6" />}
-          color="red"
-        />
-
-        <StatCard
-          title="Proyectos"
-          value={stats?.activeProjects || 0}
-          subtitle="en curso"
-          icon={<FolderKanban className="w-6 h-6" />}
-          color="orange"
-        />
-
-        <StatCard
-          title="Hábitos"
-          value={stats?.activeHabits || 0}
-          subtitle="activos"
-          icon={<TrendingUp className="w-6 h-6" />}
-          color="teal"
-        />
-
-        <StatCard
-          title="Tareas completadas"
-          value={stats?.completedTasksToday || 0}
-          subtitle="hoy"
-          icon={<FolderKanban className="w-6 h-6" />}
-          color="indigo"
+          value={stats?.contacts || 0}
+          label="contactos"
         />
       </div>
     </div>
@@ -219,6 +295,36 @@ interface StatCardProps {
   icon: ReactNode;
   color: string;
   children?: ReactNode;
+}
+
+interface MetricCardProps {
+  title: string;
+  icon: ReactNode;
+  color: string;
+  value: number;
+  label: string;
+}
+
+function MetricCard({ title, icon, color, value, label }: MetricCardProps) {
+  const colorClasses: Record<string, string> = {
+    blue: 'bg-blue-100 text-blue-600',
+    purple: 'bg-purple-100 text-purple-600',
+  };
+
+  return (
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      <div className="p-6 border-b border-gray-100">
+        <div className="flex items-center gap-3">
+          <div className={`p-2 rounded-lg ${colorClasses[color]}`}>{icon}</div>
+          <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
+        </div>
+      </div>
+      <div className="p-6">
+        <div className="text-4xl font-bold text-gray-900 mb-2">{value}</div>
+        <div className="text-sm text-gray-500">{label}</div>
+      </div>
+    </div>
+  );
 }
 
 function StatCard({ title, value, subtitle, icon, color, children }: StatCardProps) {

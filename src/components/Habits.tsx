@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { Plus, TrendingUp, Calendar, Trash2, Check, X } from 'lucide-react';
+import { Plus, TrendingUp, Calendar, Trash2, Check, Flame } from 'lucide-react';
 
 interface Habit {
   id: string;
@@ -32,6 +32,7 @@ export default function Habits() {
   const [habits, setHabits] = useState<Habit[]>([]);
   const [logs, setLogs] = useState<HabitLog[]>([]);
   const [showForm, setShowForm] = useState(false);
+  const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [loading, setLoading] = useState(true);
 
@@ -54,7 +55,8 @@ export default function Habits() {
         .from('habit_logs')
         .select('*')
         .eq('user_id', user.id)
-        .eq('log_date', selectedDate),
+        .gte('log_date', new Date(new Date().setDate(new Date().getDate() - 30)).toISOString().split('T')[0])
+        .lte('log_date', selectedDate),
     ]);
 
     setHabits(habitsData || []);
@@ -115,9 +117,50 @@ export default function Habits() {
 
   const getHabitLog = (habitId: string) => logs.find((l) => l.habit_id === habitId);
 
+  const calculateStreak = (habitId: string): number => {
+    let streak = 0;
+    let currentDate = new Date(selectedDate);
+    
+    while (streak < 365) {
+      const dateStr = currentDate.toISOString().split('T')[0];
+      const log = logs.find((l) => l.habit_id === habitId && l.log_date === dateStr);
+      
+      if (log?.completed) {
+        streak++;
+        currentDate.setDate(currentDate.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+    return streak;
+  };
+
+  const getWeeklyData = (habitId: string) => {
+    const weekDays = [];
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+      const log = logs.find((l) => l.habit_id === habitId && l.log_date === dateStr);
+      weekDays.push({
+        date: dateStr,
+        day: ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'][date.getDay()],
+        completed: log?.completed || false,
+      });
+    }
+    return weekDays;
+  };
+
+  const getMonthlyStats = (habitId: string) => {
+    const completedDays = logs.filter((l) => l.habit_id === habitId && l.completed).length;
+    const totalDays = logs.filter((l) => l.habit_id === habitId).length;
+    const completionRate = totalDays > 0 ? Math.round((completedDays / totalDays) * 100) : 0;
+    return { completedDays, totalDays, completionRate };
+  };
+
   const todayCompletionRate =
     habits.length > 0
-      ? Math.round((logs.filter((l) => l.completed).length / habits.length) * 100)
+      ? Math.round((logs.filter((l) => l.log_date === selectedDate && l.completed).length / habits.length) * 100)
       : 0;
 
   const categories = {
@@ -233,83 +276,133 @@ export default function Habits() {
               No hay hábitos activos. Crea tu primer hábito.
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {habits.map((habit) => {
                 const log = getHabitLog(habit.id);
                 const isCompleted = log?.completed || false;
                 const value = log?.value || 0;
+                const streak = calculateStreak(habit.id);
+                const weekData = getWeeklyData(habit.id);
+                const monthStats = getMonthlyStats(habit.id);
 
                 return (
                   <div
                     key={habit.id}
-                    className={`p-4 border rounded-lg transition ${
+                    className={`border rounded-lg transition overflow-hidden ${
                       isCompleted
                         ? 'border-green-300 bg-green-50'
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4 flex-1">
-                        {habit.metric_type === 'boolean' ? (
-                          <button
-                            onClick={() => toggleHabitLog(habit.id, !isCompleted)}
-                            className={`w-10 h-10 rounded-lg border-2 flex items-center justify-center transition ${
-                              isCompleted
-                                ? 'border-green-600 bg-green-600 text-white'
-                                : 'border-gray-300 hover:border-green-600'
-                            }`}
-                          >
-                            {isCompleted && <Check className="w-6 h-6" />}
-                          </button>
-                        ) : (
-                          <input
-                            type="number"
-                            value={value}
-                            onChange={(e) => updateHabitValue(habit.id, parseFloat(e.target.value) || 0)}
-                            className="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                            placeholder="0"
-                          />
-                        )}
-
-                        <div className="flex-1">
-                          <h3 className="font-medium text-gray-900">{habit.habit}</h3>
-                          <div className="flex items-center gap-3 mt-1">
-                            <span
-                              className={`px-2 py-1 text-xs rounded-full ${
-                                habit.category === 'health'
-                                  ? 'bg-green-100 text-green-700'
-                                  : habit.category === 'language'
-                                  ? 'bg-blue-100 text-blue-700'
-                                  : habit.category === 'productivity'
-                                  ? 'bg-purple-100 text-purple-700'
-                                  : habit.category === 'learning'
-                                  ? 'bg-orange-100 text-orange-700'
-                                  : 'bg-gray-100 text-gray-700'
+                    {/* Header with title and actions */}
+                    <div className="p-4 border-b border-gray-200 bg-white">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4 flex-1">
+                          {habit.metric_type === 'boolean' ? (
+                            <button
+                              onClick={() => toggleHabitLog(habit.id, !isCompleted)}
+                              className={`w-12 h-12 rounded-lg border-2 flex items-center justify-center transition font-bold text-lg ${
+                                isCompleted
+                                  ? 'border-green-600 bg-green-600 text-white'
+                                  : 'border-gray-300 hover:border-green-600 bg-white'
                               }`}
                             >
-                              {habit.category}
-                            </span>
-                            <span className="text-xs text-gray-500 capitalize">{habit.frequency}</span>
-                            {habit.metric_type !== 'boolean' && (
-                              <span className="text-xs text-gray-500">
-                                {habit.metric_type}
-                              </span>
-                            )}
-                          </div>
-                          {habit.trigger && (
-                            <div className="text-sm text-gray-600 mt-1">
-                              Trigger: {habit.trigger}
-                            </div>
+                              {isCompleted ? <Check className="w-6 h-6" /> : '-'}
+                            </button>
+                          ) : (
+                            <input
+                              type="number"
+                              value={value}
+                              onChange={(e) => updateHabitValue(habit.id, parseFloat(e.target.value) || 0)}
+                              className="w-12 h-12 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-center font-medium"
+                              placeholder="0"
+                            />
                           )}
+
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-gray-900 text-lg">{habit.habit}</h3>
+                            <div className="flex items-center gap-3 mt-1 flex-wrap">
+                              <span
+                                className={`px-2 py-1 text-xs font-medium rounded-full ${
+                                  habit.category === 'health'
+                                    ? 'bg-green-100 text-green-700'
+                                    : habit.category === 'language'
+                                    ? 'bg-blue-100 text-blue-700'
+                                    : habit.category === 'productivity'
+                                    ? 'bg-purple-100 text-purple-700'
+                                    : habit.category === 'learning'
+                                    ? 'bg-orange-100 text-orange-700'
+                                    : 'bg-gray-100 text-gray-700'
+                                }`}
+                              >
+                                {habit.category}
+                              </span>
+                              {streak > 0 && (
+                                <span className="flex items-center gap-1 px-2 py-1 text-xs font-medium bg-orange-100 text-orange-700 rounded-full">
+                                  <Flame className="w-3 h-3" /> {streak} días
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => {
+                              setEditingHabit(habit);
+                              setShowForm(true);
+                            }}
+                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                          >
+                            ✎
+                          </button>
+                          <button
+                            onClick={() => deleteHabit(habit.id)}
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Stats and Weekly Chart */}
+                    <div className="p-4 space-y-4">
+                      {/* Monthly Stats */}
+                      <div className="grid grid-cols-3 gap-3 text-center">
+                        <div className="bg-white rounded-lg p-3 border border-gray-200">
+                          <div className="text-2xl font-bold text-blue-600">{monthStats.completionRate}%</div>
+                          <div className="text-xs text-gray-600">Cumplimiento</div>
+                        </div>
+                        <div className="bg-white rounded-lg p-3 border border-gray-200">
+                          <div className="text-2xl font-bold text-green-600">{monthStats.completedDays}</div>
+                          <div className="text-xs text-gray-600">Completados</div>
+                        </div>
+                        <div className="bg-white rounded-lg p-3 border border-gray-200">
+                          <div className="text-2xl font-bold text-purple-600">{streak}</div>
+                          <div className="text-xs text-gray-600">Racha actual</div>
                         </div>
                       </div>
 
-                      <button
-                        onClick={() => deleteHabit(habit.id)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      {/* Weekly Chart */}
+                      <div>
+                        <div className="text-xs font-medium text-gray-600 mb-2">Esta semana</div>
+                        <div className="flex justify-between gap-1">
+                          {weekData.map((day, idx) => (
+                            <div key={idx} className="flex-1 text-center">
+                              <div
+                                className={`w-full h-12 rounded-lg mb-1 border-2 transition flex items-center justify-center ${
+                                  day.completed
+                                    ? 'bg-green-500 border-green-600 text-white font-bold'
+                                    : 'bg-gray-100 border-gray-300'
+                                }`}
+                              >
+                                {day.completed && <Check className="w-5 h-5" />}
+                              </div>
+                              <div className="text-xs font-medium text-gray-700">{day.day}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 );
@@ -321,9 +414,14 @@ export default function Habits() {
 
       {showForm && (
         <HabitForm
-          onClose={() => setShowForm(false)}
+          editingHabit={editingHabit}
+          onClose={() => {
+            setShowForm(false);
+            setEditingHabit(null);
+          }}
           onSuccess={() => {
             setShowForm(false);
+            setEditingHabit(null);
             loadData();
           }}
         />
@@ -332,36 +430,53 @@ export default function Habits() {
   );
 }
 
-function HabitForm({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
+function HabitForm({ editingHabit, onClose, onSuccess }: { editingHabit: Habit | null; onClose: () => void; onSuccess: () => void }) {
   const { user } = useAuth();
   const [formData, setFormData] = useState({
-    habit: '',
-    category: 'health' as Habit['category'],
-    frequency: 'daily' as Habit['frequency'],
-    metric_type: 'boolean' as Habit['metric_type'],
-    trigger: '',
-    action: '',
-    reward: '',
+    habit: editingHabit?.habit || '',
+    category: (editingHabit?.category || 'health') as Habit['category'],
+    frequency: (editingHabit?.frequency || 'daily') as Habit['frequency'],
+    metric_type: (editingHabit?.metric_type || 'boolean') as Habit['metric_type'],
+    trigger: editingHabit?.trigger || '',
+    action: editingHabit?.action || '',
+    reward: editingHabit?.reward || '',
   });
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!user) return;
 
-    await supabase.from('habits').insert([
-      {
-        user_id: user.id,
-        habit: formData.habit,
-        category: formData.category,
-        frequency: formData.frequency,
-        metric_type: formData.metric_type,
-        trigger: formData.trigger || null,
-        action: formData.action || null,
-        reward: formData.reward || null,
-        active: true,
-        consistency_score: 0,
-      },
-    ]);
+    if (editingHabit) {
+      // Actualizar hábito existente
+      await supabase
+        .from('habits')
+        .update({
+          habit: formData.habit,
+          category: formData.category,
+          frequency: formData.frequency,
+          metric_type: formData.metric_type,
+          trigger: formData.trigger || null,
+          action: formData.action || null,
+          reward: formData.reward || null,
+        })
+        .eq('id', editingHabit.id);
+    } else {
+      // Crear nuevo hábito
+      await supabase.from('habits').insert([
+        {
+          user_id: user.id,
+          habit: formData.habit,
+          category: formData.category,
+          frequency: formData.frequency,
+          metric_type: formData.metric_type,
+          trigger: formData.trigger || null,
+          action: formData.action || null,
+          reward: formData.reward || null,
+          active: true,
+          consistency_score: 0,
+        },
+      ]);
+    }
 
     onSuccess();
   }
@@ -369,7 +484,7 @@ function HabitForm({ onClose, onSuccess }: { onClose: () => void; onSuccess: () 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-lg max-w-2xl w-full p-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Nuevo Hábito</h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-4">{editingHabit ? 'Editar Hábito' : 'Nuevo Hábito'}</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -475,7 +590,7 @@ function HabitForm({ onClose, onSuccess }: { onClose: () => void; onSuccess: () 
               type="submit"
               className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
             >
-              Guardar
+              {editingHabit ? 'Actualizar' : 'Guardar'}
             </button>
           </div>
         </form>
