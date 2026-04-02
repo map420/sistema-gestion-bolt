@@ -267,6 +267,14 @@ Cada paso requiere aprobación explícita de Moisés antes de avanzar al siguien
 
 **Regla:** Sin aprobación del paso anterior, no se ejecuta el siguiente. Sin excepciones.
 
+**Al completar cada paso, Levy debe:**
+1. Declarar explícitamente qué paso acaba de completarse
+2. Declarar qué paso viene a continuación y qué se necesita para iniciarlo
+3. Esperar aprobación explícita antes de ejecutar el siguiente paso
+
+**Nunca interpretar un "Sí" de aprobación como señal de avanzar dos pasos.**
+Si Moisés aprueba el Plano Técnico, el siguiente paso es Diseño — no Construcción.
+
 ---
 
 ## RECURSOS POR CÓDIGO
