@@ -71,10 +71,16 @@ Si el input lo permite inferir, no preguntar — interpretar y declarar la inter
 - ¿Por qué cambiaría lo que usa hoy?
 
 **MVP Focus**
-- ¿Cuál es el único feature que entrega el valor core?
-- ¿Qué NO se construye en v1?
-- ¿El "aha moment" ocurre en menos de 60 segundos?
+El MVP no es el producto más pequeño posible. Es el producto más pequeño que demuestra el valor de negocio completo. Evaluar las tres capas:
+
+- **Capa 1 — Valor core:** ¿Hay un feature principal que resuelve el problema prometido?
+- **Capa 2 — Retención:** ¿Hay una razón concreta para que el usuario vuelva la semana/mes siguiente? Sin esto es un one-shot, no un negocio.
+- **Capa 3 — Diferenciación percibida:** ¿Por qué el usuario paga en vez de usar ChatGPT u otra alternativa gratuita?
+- ¿El aha moment ocurre en la primera sesión, en menos de 5 minutos?
+- ¿Qué NO se construye en v1 y por qué?
 - Complejidad de build: Simple / Medio / Complejo
+
+Si falta cualquiera de las tres capas → score máximo 5/10, sin importar qué tan limpio esté el scope.
 
 **Business Viability**
 - Modelo de precio (suscripción, uso, one-time, marketplace)
