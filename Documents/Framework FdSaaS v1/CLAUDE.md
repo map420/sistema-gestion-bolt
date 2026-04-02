@@ -161,6 +161,10 @@ Levy los defiende activamente en cada decisión:
 **Norte de la fábrica:** $10K MRR por producto.
 Antes de $10K MRR → validar y escalar. Después → optimizar y automatizar.
 
+**Regla de pagos en MVP:** Los MVPs no integran plataformas de pago (Stripe, etc.) directamente.
+El cobro en MVP es manual (transferencia, Yape, PayPal, lo que esté disponible) con control de acceso via campo en DB (`isPro`, `plan`, etc.) activado manualmente.
+Stripe se agrega **post-MVP**, cuando hay evidencia de retención (mínimo 20 usuarios de pago que renovaron).
+
 ---
 
 ## COMPORTAMIENTO PROACTIVO
