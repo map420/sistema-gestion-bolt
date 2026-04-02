@@ -1,0 +1,91 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Organization (multi-tenant root) ───────────────────────────────────────
+
+model Clinica {
+  id              String    @id @default(cuid())
+  nombre          String
+  ciudad          String
+  telefono        String
+  whatsappNumero  String?
+  plan            Plan      @default(STARTER)
+  planActivoHasta DateTime?
+  userId          String    @unique // Supabase auth.users UUID
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  dentistas Dentista[]
+  pacientes Paciente[]
+  citas     Cita[]
+
+  @@index([userId])
+}
+
+model Dentista {
+  id        String   @id @default(cuid())
+  nombre    String
+  clinicaId String
+  createdAt DateTime @default(now())
+
+  clinica Clinica @relation(fields: [clinicaId], references: [id], onDelete: Cascade)
+  citas   Cita[]
+
+  @@index([clinicaId])
+}
+
+model Paciente {
+  id        String   @id @default(cuid())
+  nombre    String
+  telefono  String
+  clinicaId String
+  createdAt DateTime @default(now())
+
+  clinica Clinica @relation(fields: [clinicaId], references: [id], onDelete: Cascade)
+  citas   Cita[]
+
+  @@index([clinicaId])
+}
+
+model Cita {
+  id          String      @id @default(cuid())
+  fecha       DateTime
+  motivo      String?
+  estado      EstadoCita  @default(PENDIENTE)
+  wa1SentAt   DateTime?   // recordatorio 24h
+  wa2SentAt   DateTime?   // recordatorio 2h
+  clinicaId   String
+  dentistaId  String
+  pacienteId  String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  clinica   Clinica  @relation(fields: [clinicaId], references: [id], onDelete: Cascade)
+  dentista  Dentista @relation(fields: [dentistaId], references: [id])
+  paciente  Paciente @relation(fields: [pacienteId], references: [id])
+
+  @@index([clinicaId])
+  @@index([clinicaId, fecha])
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum EstadoCita {
+  PENDIENTE
+  RECORDATORIO_1
+  RECORDATORIO_2
+  CONFIRMADA
+  CANCELADA
+  NO_SHOW
+}
+
+enum Plan {
+  TRIAL
+  STARTER
+  PRO
+}
