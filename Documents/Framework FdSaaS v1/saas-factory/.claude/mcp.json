@@ -1,0 +1,40 @@
+{
+  "mcpServers": {
+    "saas-factory": {
+      "command": "node",
+      "args": ["./mcp-server.js"],
+      "env": {
+        "AGENTS_PATH": "./agents",
+        "COMMANDS_PATH": "./commands",
+        "KNOWLEDGE_PATH": "./knowledge"
+      }
+    },
+    "supabase": {
+      "command": "npx",
+      "args": ["-y", "@supabase/mcp-server-supabase@latest", "--access-token", "sbp_e4742a97f8c16c31a41a3ac0dbf720b37529a384"]
+    }
+  },
+  "tools": {
+    "runAgent": {
+      "description": "Execute a specific agent with context",
+      "params": {
+        "agentName": "string",
+        "context": "object"
+      }
+    },
+    "validateConstraints": {
+      "description": "QA Auditor validates scope",
+      "params": {
+        "agentName": "string",
+        "deliverable": "object"
+      }
+    },
+    "updateSessionLog": {
+      "description": "Persist session state",
+      "params": {
+        "action": "string",
+        "details": "object"
+      }
+    }
+  }
+}

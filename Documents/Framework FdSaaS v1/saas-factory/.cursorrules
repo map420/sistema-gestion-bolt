@@ -1,0 +1,52 @@
+# SaaS Factory Cursor Rules
+
+## Code Standards
+
+- **Language**: TypeScript 5.0+ (strict mode)
+- **Framework**: React 19 (app router)
+- **Backend**: Node.js 20 LTS + Express/Fastify
+- **Database**: PostgreSQL 15+
+- **Styling**: Tailwind CSS v4
+
+## File Naming
+
+- Components: PascalCase (Button.tsx)
+- Utilities: camelCase (formatDate.ts)
+- Constants: UPPER_SNAKE_CASE (API_BASE_URL)
+- Types: PascalCase + .ts extension (UserType.ts)
+
+## Commit Messages
+
+Format: `[AGENT:type] brief description`
+
+Examples:
+- `[AGENT:builder] feat: Add user authentication`
+- `[AGENT:payments] fix: Fix Stripe webhook signature`
+- `[AUDIT] chore: Update security audit report`
+
+## Testing Requirements
+
+- Unit tests: ≥ 80% coverage
+- Integration tests: Critical paths
+- E2E tests: User stories
+- Load tests: 100+ concurrent users
+
+## Security Checklist
+
+- [ ] No secrets in code (use .env)
+- [ ] HTTPS only (443)
+- [ ] SQL injection protections (parameterized queries)
+- [ ] CORS properly configured
+- [ ] Rate limiting enabled
+- [ ] Input validation on all forms
+
+## Documentation
+
+- Every public API must have JSDoc
+- Complex logic needs inline comments
+- Architecture decisions go to `knowledge/decisions.md`
+- User-facing features need ADR
+
+---
+
+*Last updated: 2026-04-01*
