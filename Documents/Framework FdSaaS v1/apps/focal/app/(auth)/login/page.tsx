@@ -17,11 +17,17 @@ export default function LoginPage() {
     setLoading(true)
     setError("")
 
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? window.location.origin
+
     if (mode === "login") {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) { setError(error.message); setLoading(false); return }
     } else {
-      const { error } = await supabase.auth.signUp({ email, password })
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { emailRedirectTo: `${appUrl}/auth/callback` },
+      })
       if (error) { setError(error.message); setLoading(false); return }
     }
 
