@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Objective {
+  id          String   @id @default(cuid())
+  userId      String   @map("user_id")
+  title       String
+  description String?
+  startDate   DateTime @map("start_date")
+  endDate     DateTime @map("end_date")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  keyResults KeyResult[]
+  notes      Note[]
+
+  @@map("fc_objectives")
+}
+
+model KeyResult {
+  id           String   @id @default(cuid())
+  objectiveId  String   @map("objective_id")
+  userId       String   @map("user_id")
+  title        String
+  targetValue  Float    @default(100) @map("target_value")
+  currentValue Float    @default(0) @map("current_value")
+  unit         String   @default("%")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  objective Objective @relation(fields: [objectiveId], references: [id], onDelete: Cascade)
+  notes     Note[]
+
+  @@map("fc_key_results")
+}
+
+model Note {
+  id          String   @id @default(cuid())
+  userId      String   @map("user_id")
+  objectiveId String   @map("objective_id")
+  keyResultId String?  @map("key_result_id")
+  title       String
+  content     String
+  source      String?
+  isDistilled Boolean  @default(false) @map("is_distilled")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  objective Objective  @relation(fields: [objectiveId], references: [id], onDelete: Cascade)
+  keyResult KeyResult? @relation(fields: [keyResultId], references: [id], onDelete: SetNull)
+
+  @@map("fc_notes")
+}
+
+model WeeklyReview {
+  id               String   @id @default(cuid())
+  userId           String   @map("user_id")
+  weekStart        DateTime @map("week_start")
+  capturedCount    Int      @map("captured_count")
+  distilledNoteIds String[] @map("distilled_note_ids")
+  progressUpdates  Json     @map("progress_updates")
+  reflection       String?
+  completedAt      DateTime @default(now()) @map("completed_at")
+
+  @@unique([userId, weekStart])
+  @@map("fc_weekly_reviews")
+}
+
+model Profile {
+  id        String   @id @default(cuid())
+  userId    String   @unique @map("user_id")
+  isPro     Boolean  @default(false) @map("is_pro")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("fc_profiles")
+}
