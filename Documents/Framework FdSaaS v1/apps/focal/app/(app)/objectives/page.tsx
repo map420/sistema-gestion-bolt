@@ -31,9 +31,11 @@ export default function ObjectivesPage() {
   useEffect(() => { loadObjectives() }, [])
 
   async function loadObjectives() {
-    const res = await fetch("/api/objectives")
-    const data = await res.json()
-    setObjectives(data)
+    try {
+      const res = await fetch("/api/objectives")
+      const data = await res.json()
+      setObjectives(Array.isArray(data) ? data : [])
+    } catch {}
     setLoading(false)
   }
 

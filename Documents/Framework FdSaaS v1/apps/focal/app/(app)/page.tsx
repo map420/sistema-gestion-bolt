@@ -31,6 +31,7 @@ export default function DashboardPage() {
     fetch("/api/dashboard")
       .then((r) => r.json())
       .then((d) => { setData(d); setLoading(false) })
+      .catch(() => setLoading(false))
   }, [])
 
   const quarter = (() => {

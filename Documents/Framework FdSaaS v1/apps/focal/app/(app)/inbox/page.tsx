@@ -13,12 +13,16 @@ export default function InboxPage() {
   useEffect(() => { loadInbox() }, [])
 
   async function loadInbox() {
-    const res = await fetch("/api/inbox")
-    const data = await res.json()
-    setGroups(data)
-    const exp: Record<string, boolean> = {}
-    data.forEach((g: ObjectiveGroup) => { exp[g.id] = true })
-    setExpanded(exp)
+    try {
+      const res = await fetch("/api/inbox")
+      const data = await res.json()
+      if (Array.isArray(data)) {
+        setGroups(data)
+        const exp: Record<string, boolean> = {}
+        data.forEach((g: ObjectiveGroup) => { exp[g.id] = true })
+        setExpanded(exp)
+      }
+    } catch {}
     setLoading(false)
   }
 
