@@ -7,7 +7,7 @@ const navItems = [
   { href: "/objectives", icon: "flag", label: "Goals" },
   { href: "/capture", icon: "add_circle", label: "Capture" },
   { href: "/inbox", icon: "inbox", label: "Inbox" },
-  { href: "/review", icon: "rate_review", label: "Review" },
+  { href: "/settings", icon: "settings", label: "Settings" },
 ]
 
 export default function BottomNav() {

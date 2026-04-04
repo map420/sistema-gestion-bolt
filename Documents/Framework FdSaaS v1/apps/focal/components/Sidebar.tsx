@@ -8,6 +8,7 @@ const navItems = [
   { href: "/objectives", icon: "flag", label: "Objectives" },
   { href: "/inbox", icon: "inbox", label: "Inbox" },
   { href: "/review", icon: "rate_review", label: "Weekly Review" },
+  { href: "/settings", icon: "settings", label: "Settings" },
 ]
 
 export default function Sidebar({ userEmail }: { userEmail: string }) {
