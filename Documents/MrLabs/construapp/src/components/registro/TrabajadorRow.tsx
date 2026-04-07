@@ -59,8 +59,8 @@ export default function TrabajadorRow({ trabajador, registroExistente, onChange 
       </div>
 
       {activo && (
-        <div className="px-4 pb-3.5 pt-0 border-t border-white/5 flex gap-2 mt-0">
-          <div className="flex-1 flex flex-col gap-1 pt-3">
+        <div className="px-4 pb-3.5 pt-3 border-t border-white/5 flex flex-col gap-2 sm:flex-row sm:gap-2">
+          <div className="flex-1 flex flex-col gap-1">
             <span className="text-xs text-[#555] uppercase tracking-wide">Actividad</span>
             <input
               className="bg-[#0d0d0d] border border-white/10 rounded-lg px-3 py-2 text-sm text-[#f0f0f0] focus:outline-none focus:border-[#9d7ff0]"
@@ -69,21 +69,23 @@ export default function TrabajadorRow({ trabajador, registroExistente, onChange 
               onChange={e => { setActividad(e.target.value); handleChange(cantidad, e.target.value) }}
             />
           </div>
-          <div className="w-20 flex flex-col gap-1 pt-3">
-            <span className="text-xs text-[#555] uppercase tracking-wide">{trabajador.tipoPago === 'dia' ? 'Días' : 'Horas'}</span>
-            <input
-              type="number"
-              min="0"
-              step={trabajador.tipoPago === 'hora' ? '0.5' : '1'}
-              className="bg-[#0d0d0d] border border-white/10 rounded-lg px-3 py-2 text-sm text-[#f0f0f0] text-center focus:outline-none focus:border-[#9d7ff0]"
-              value={cantidad}
-              onChange={e => { setCantidad(e.target.value); handleChange(e.target.value, actividad) }}
-            />
-          </div>
-          <div className="w-24 flex flex-col gap-1 pt-3">
-            <span className="text-xs text-[#555] uppercase tracking-wide">Total</span>
-            <div className="bg-[#9d7ff015] border border-[#9d7ff030] rounded-lg px-3 py-2 text-sm font-bold text-[#9d7ff0] text-center">
-              {formatMoneda(monto)}
+          <div className="flex gap-2 sm:contents">
+            <div className="flex-1 sm:w-20 sm:flex-none flex flex-col gap-1">
+              <span className="text-xs text-[#555] uppercase tracking-wide">{trabajador.tipoPago === 'dia' ? 'Días' : 'Horas'}</span>
+              <input
+                type="number"
+                min="0"
+                step={trabajador.tipoPago === 'hora' ? '0.5' : '1'}
+                className="w-full bg-[#0d0d0d] border border-white/10 rounded-lg px-3 py-2 text-sm text-[#f0f0f0] text-center focus:outline-none focus:border-[#9d7ff0]"
+                value={cantidad}
+                onChange={e => { setCantidad(e.target.value); handleChange(e.target.value, actividad) }}
+              />
+            </div>
+            <div className="flex-1 sm:w-24 sm:flex-none flex flex-col gap-1">
+              <span className="text-xs text-[#555] uppercase tracking-wide">Total</span>
+              <div className="bg-[#9d7ff015] border border-[#9d7ff030] rounded-lg px-3 py-2 text-sm font-bold text-[#9d7ff0] text-center">
+                {formatMoneda(monto)}
+              </div>
             </div>
           </div>
         </div>

@@ -54,11 +54,11 @@ export default function RegistroDiario() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-xl font-bold text-[#f0f0f0] tracking-tight">Registro diario</h1>
         <div className="flex items-center gap-2">
           <button onClick={() => cambiarFecha(-1)} className="p-2 rounded-lg bg-[#111] border border-white/10 text-[#aaa] hover:text-white"><ChevronLeft size={16} /></button>
-          <span className="text-sm text-[#f0f0f0] font-medium px-3 py-2 bg-[#111] border border-white/10 rounded-lg capitalize min-w-48 text-center">{formatFecha(fecha)}</span>
+          <span className="flex-1 text-sm text-[#f0f0f0] font-medium px-3 py-2 bg-[#111] border border-white/10 rounded-lg capitalize text-center sm:min-w-48">{formatFecha(fecha)}</span>
           <button onClick={() => cambiarFecha(1)} className="p-2 rounded-lg bg-[#111] border border-white/10 text-[#aaa] hover:text-white"><ChevronRight size={16} /></button>
         </div>
       </div>

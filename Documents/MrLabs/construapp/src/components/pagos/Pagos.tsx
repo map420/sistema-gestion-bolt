@@ -104,13 +104,13 @@ export default function Pagos({ nombreEmpresa }: Props) {
                 </div>
                 <div className="flex gap-2 border-t border-white/5 pt-3">
                   <button onClick={() => setDetalleModal(t)} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs border border-white/10 text-[#555] hover:text-[#aaa]">
-                    <Eye size={13} /> Ver detalle
+                    <Eye size={13} /> <span className="hidden sm:inline">Ver detalle</span><span className="sm:hidden">Detalle</span>
                   </button>
                   <button onClick={() => setPagoModal(t)} disabled={sinDeuda} className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold transition-colors ${sinDeuda ? 'bg-[#1a1a1a] text-[#333] cursor-not-allowed' : 'bg-[#9d7ff0] text-white hover:bg-[#8b6fd4]'}`}>
-                    <DollarSign size={13} /> Registrar pago
+                    <DollarSign size={13} /> <span className="hidden sm:inline">Registrar pago</span><span className="sm:hidden">Pagar</span>
                   </button>
                   <button onClick={() => generarComprobante(t)} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs border border-white/10 text-[#555] hover:text-[#aaa]">
-                    <FileText size={13} /> Comprobante
+                    <FileText size={13} /> <span className="hidden sm:inline">Comprobante</span><span className="sm:hidden">PDF</span>
                   </button>
                 </div>
               </div>
