@@ -1,17 +1,19 @@
 // src/components/pagos/DetalleModal.tsx
 import { X } from 'lucide-react'
-import type { Trabajador, Registro } from '../../types'
-import { formatFecha, formatMoneda } from '../../utils'
+import type { Trabajador, Registro, Pago } from '../../types'
+import { formatFecha, formatMoneda, calcularSaldo } from '../../utils'
 
 interface Props {
   trabajador: Trabajador
   registros: Registro[]
+  pagos: Pago[]
   periodo: { desde: string; hasta: string }
   onCerrar: () => void
 }
 
-export default function DetalleModal({ trabajador, registros, periodo, onCerrar }: Props) {
+export default function DetalleModal({ trabajador, registros, pagos, periodo, onCerrar }: Props) {
   const etiquetaPeriodo = `${periodo.desde} al ${periodo.hasta}`
+  const { devengado, pagado, pendiente } = calcularSaldo(trabajador.id, periodo, registros, pagos)
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
       <div className="bg-[#111] border border-white/10 rounded-2xl w-full max-w-lg p-6 flex flex-col gap-4 max-h-[80vh]">
@@ -35,9 +37,19 @@ export default function DetalleModal({ trabajador, registros, periodo, onCerrar 
           ))}
         </div>
         {registros.length > 0 && (
-          <div className="border-t border-white/5 pt-3 flex justify-between items-center">
-            <span className="text-xs text-[#555]">Total devengado</span>
-            <span className="font-bold text-[#f0f0f0]">{formatMoneda(registros.reduce((s, r) => s + r.montoCalculado, 0))}</span>
+          <div className="border-t border-white/5 pt-3 flex justify-between items-center gap-4">
+            <div className="flex flex-col items-center gap-0.5">
+              <span className="text-[10px] text-[#555] uppercase tracking-wide">Devengado</span>
+              <span className="text-sm font-bold text-[#f0f0f0]">{formatMoneda(devengado)}</span>
+            </div>
+            <div className="flex flex-col items-center gap-0.5">
+              <span className="text-[10px] text-[#555] uppercase tracking-wide">Pagado</span>
+              <span className="text-sm font-bold text-[#34d399]">{formatMoneda(pagado)}</span>
+            </div>
+            <div className="flex flex-col items-center gap-0.5">
+              <span className="text-[10px] text-[#555] uppercase tracking-wide">Pendiente</span>
+              <span className={`text-sm font-bold ${pendiente > 0 ? 'text-[#f87171]' : 'text-[#34d399]'}`}>{formatMoneda(pendiente)}</span>
+            </div>
           </div>
         )}
       </div>

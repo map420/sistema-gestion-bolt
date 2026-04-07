@@ -9,7 +9,7 @@ import PlanillaTemplate from '../pdf/PlanillaTemplate'
 type ModoPeriodo = 'semana' | 'quincena' | 'personalizado'
 
 export default function Reportes() {
-  const [data] = useState(() => loadData())
+  const data = loadData()
   const [modo, setModo] = useState<ModoPeriodo>('semana')
   const [periodoCustom, setPeriodoCustom] = useState({ desde: '', hasta: '' })
   const { exportar } = usePDF()

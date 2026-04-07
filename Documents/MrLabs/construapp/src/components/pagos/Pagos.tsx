@@ -80,6 +80,9 @@ export default function Pagos() {
                   </div>
                   <div className="text-right">
                     <p className="text-base font-bold text-[#f0f0f0] tracking-tight">{formatMoneda(devengado)}</p>
+                    <p className="text-[10px] text-[#555] mt-0.5">
+                      Dev {formatMoneda(devengado)} · Pag {formatMoneda(pagado)} · Sal {formatMoneda(pendiente)}
+                    </p>
                     <span className={`text-xs font-medium ${sinDeuda ? 'text-[#34d399]' : 'text-[#f87171]'}`}>
                       {sinDeuda ? 'Sin deuda' : `Pendiente ${formatMoneda(pendiente)}`}
                     </span>
@@ -115,6 +118,7 @@ export default function Pagos() {
         <DetalleModal
           trabajador={detalleModal}
           registros={data.registros.filter(r => r.trabajadorId === detalleModal.id && r.fecha >= periodo.desde && r.fecha <= periodo.hasta)}
+          pagos={data.pagos}
           periodo={periodo}
           onCerrar={() => setDetalleModal(null)}
         />

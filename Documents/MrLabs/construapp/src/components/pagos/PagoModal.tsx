@@ -41,6 +41,7 @@ export default function PagoModal({ trabajador, saldoPendiente, periodo, onGuard
           <button onClick={onCerrar} className="text-[#555] hover:text-[#aaa]"><X size={18} /></button>
         </div>
         <p className="text-sm text-[#555]">{trabajador.nombre} · Saldo pendiente: <span className="text-[#f87171] font-semibold">{formatMoneda(saldoPendiente)}</span></p>
+        <p className="text-xs text-[#444]">Período: {periodo.desde} al {periodo.hasta}</p>
 
         {error && <p className="text-xs text-[#f87171] bg-[#f8717115] border border-[#f8717130] rounded-lg px-3 py-2">{error}</p>}
 
