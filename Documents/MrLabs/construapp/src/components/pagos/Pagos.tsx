@@ -1,9 +1,9 @@
 // src/components/pagos/Pagos.tsx
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Eye, DollarSign, FileText } from 'lucide-react'
 import type { Trabajador, Pago } from '../../types'
 import { loadData, updateData } from '../../storage'
-import { calcularSaldo, formatMoneda, semanaActual, quincenaActual } from '../../utils'
+import { calcularSaldo, formatMoneda, semanaActual, quincenaActual, siguienteFolio } from '../../utils'
 import { usePDF } from '../../hooks/usePDF'
 import PagoModal from './PagoModal'
 import DetalleModal from './DetalleModal'
@@ -23,11 +23,25 @@ export default function Pagos() {
   const periodo = modo === 'semana' ? semanaActual() : modo === 'quincena' ? quincenaActual() : periodoCustom
   const trabajadores = data.trabajadores.filter(t => t.activo)
 
-  const guardarPago = (pago: Pago) => {
-    const next = updateData(d => { d.pagos.push(pago); return d })
+  const guardarPago = (pagoSinFolio: Omit<Pago, 'folio'>) => {
+    const next = updateData(d => {
+      const folio = siguienteFolio(d.pagos)
+      d.pagos.push({ ...pagoSinFolio, folio })
+      return d
+    })
     setData(next)
     setPagoModal(null)
   }
+
+  useEffect(() => {
+    if (!comprobanteTarget) return
+    const { trabajador, pago } = comprobanteTarget
+    exportar(
+      `comprobante-${trabajador.id}`,
+      `Comprobante-${trabajador.nombre.replace(/\s+/g, '-')}-Folio${pago.folio}.pdf`
+    )
+    setComprobanteTarget(null)
+  }, [comprobanteTarget])
 
   const generarComprobante = (t: Trabajador) => {
     const pagosT = data.pagos
@@ -36,9 +50,6 @@ export default function Pagos() {
     const ultimoPago = pagosT[0]
     if (!ultimoPago) return
     setComprobanteTarget({ trabajador: t, pago: ultimoPago })
-    setTimeout(() => {
-      exportar(`comprobante-${t.id}`, `comprobante-${t.nombre.replace(/\s+/g, '-')}-${ultimoPago.folio}`)
-    }, 100)
   }
 
   return (

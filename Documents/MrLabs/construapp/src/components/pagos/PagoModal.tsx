@@ -2,14 +2,13 @@
 import { useState } from 'react'
 import { X } from 'lucide-react'
 import type { Trabajador, Pago } from '../../types'
-import { uuid, hoy, formatMoneda, siguienteFolio } from '../../utils'
-import { loadData } from '../../storage'
+import { uuid, hoy, formatMoneda } from '../../utils'
 
 interface Props {
   trabajador: Trabajador
   saldoPendiente: number
   periodo: { desde: string; hasta: string }
-  onGuardar: (pago: Pago) => void
+  onGuardar: (pago: Omit<Pago, 'folio'>) => void
   onCerrar: () => void
 }
 
@@ -21,7 +20,7 @@ export default function PagoModal({ trabajador, saldoPendiente, periodo, onGuard
   const handleGuardar = () => {
     const num = Number(monto)
     if (!num || num <= 0) { setError('El monto debe ser mayor a 0'); return }
-    const pagos = loadData().pagos
+    if (num > saldoPendiente) { setError('El monto no puede superar el saldo pendiente'); return }
     onGuardar({
       id: uuid(),
       trabajadorId: trabajador.id,
@@ -29,7 +28,6 @@ export default function PagoModal({ trabajador, saldoPendiente, periodo, onGuard
       monto: num,
       periodo,
       notas: notas.trim() || undefined,
-      folio: siguienteFolio(pagos),
     })
   }
 

@@ -70,7 +70,7 @@ export default function RegistroDiario() {
           <div className="flex flex-col gap-2">
             {trabajadores.map(t => (
               <TrabajadorRow
-                key={t.id}
+                key={`${t.id}-${fecha}`}
                 trabajador={t}
                 registroExistente={registrosDelDia.find(r => r.trabajadorId === t.id)}
                 onChange={parcial => handleChange(t.id, parcial)}

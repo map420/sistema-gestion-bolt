@@ -5,7 +5,11 @@ const html2pdf = require('html2pdf.js')
 export function usePDF() {
   const exportar = (elementId: string, nombreArchivo: string) => {
     const el = document.getElementById(elementId)
-    if (!el) return
+    if (!el) {
+      console.error(`usePDF: element #${elementId} not found`)
+      alert('Error al generar PDF. Intente de nuevo.')
+      return
+    }
     html2pdf().set({
       margin: 10,
       filename: `${nombreArchivo}.pdf`,
