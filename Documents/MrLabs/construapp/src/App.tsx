@@ -3,6 +3,7 @@ import { useState } from 'react'
 import Sidebar, { type Seccion } from './components/Sidebar'
 import Trabajadores from './components/trabajadores/Trabajadores'
 import RegistroDiario from './components/registro/RegistroDiario'
+import Pagos from './components/pagos/Pagos'
 
 export default function App() {
   const [seccion, setSeccion] = useState<Seccion>('trabajadores')
@@ -14,7 +15,8 @@ export default function App() {
         <div className="p-6 max-w-3xl">
           {seccion === 'trabajadores' && <Trabajadores />}
           {seccion === 'registro' && <RegistroDiario />}
-          {seccion !== 'trabajadores' && seccion !== 'registro' && <p className="text-[#555] text-sm">Próximamente: {seccion}</p>}
+          {seccion === 'pagos' && <Pagos />}
+          {seccion === 'reportes' && <p className="text-[#555] text-sm">Próximamente: reportes</p>}
         </div>
       </main>
     </div>
