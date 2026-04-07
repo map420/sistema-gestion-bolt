@@ -17,7 +17,7 @@ const ITEMS: { key: Seccion; label: string; Icon: LucideIcon }[] = [
 
 export default function BottomNav({ activa, onChange }: Props) {
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0d0d0d] border-t border-white/[0.06] flex items-stretch safe-area-inset-bottom">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0d0d0d] border-t border-white/[0.06] flex items-stretch bottom-nav-safe">
       {ITEMS.map(({ key, label, Icon }) => {
         const active = activa === key
         return (

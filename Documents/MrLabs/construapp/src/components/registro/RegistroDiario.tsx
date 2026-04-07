@@ -78,7 +78,7 @@ export default function RegistroDiario() {
             ))}
           </div>
 
-          <div className="bg-[#111] border border-white/10 rounded-xl px-4 py-3.5 flex items-center justify-between sticky bottom-4">
+          <div className="bg-[#111] border border-white/10 rounded-xl px-4 py-3.5 flex items-center justify-between sticky bottom-[80px] md:bottom-4">
             <div>
               <p className="text-xs text-[#555] uppercase tracking-wide">Total del día</p>
               <p className="text-xl font-bold text-[#9d7ff0] tracking-tight">{formatMoneda(totalDia)}</p>

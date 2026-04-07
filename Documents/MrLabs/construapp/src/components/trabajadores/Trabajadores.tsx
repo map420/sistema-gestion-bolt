@@ -38,13 +38,13 @@ export default function Trabajadores() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
           <h1 className="text-xl font-bold text-[#f0f0f0] tracking-tight">Trabajadores</h1>
           <p className="text-sm text-[#555] mt-0.5">{trabajadores.filter(t => t.activo).length} activos</p>
         </div>
-        <button onClick={() => { setEditando(undefined); setFormAbierto(true) }} className="flex items-center gap-2 bg-[#9d7ff0] hover:bg-[#8b6fd4] text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors">
-          <Plus size={16} /> Nuevo trabajador
+        <button onClick={() => { setEditando(undefined); setFormAbierto(true) }} className="shrink-0 flex items-center gap-2 bg-[#9d7ff0] hover:bg-[#8b6fd4] text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors">
+          <Plus size={16} /> <span className="hidden sm:inline">Nuevo trabajador</span><span className="sm:hidden">Nuevo</span>
         </button>
       </div>
 

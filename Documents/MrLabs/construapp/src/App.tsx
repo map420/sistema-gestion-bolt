@@ -21,7 +21,7 @@ export default function App() {
 
       {/* Main content */}
       <main className="flex-1 overflow-y-auto">
-        <div className="max-w-3xl mx-auto px-4 py-6 md:px-8 md:py-10 pb-24 md:pb-10">
+        <div className="max-w-3xl mx-auto px-4 py-6 md:px-8 md:py-10 pb-28 md:pb-10">
           {seccion === 'trabajadores'  && <Trabajadores />}
           {seccion === 'registro'      && <RegistroDiario />}
           {seccion === 'pagos'         && <Pagos nombreEmpresa={config.nombreEmpresa || 'Mi Empresa'} />}

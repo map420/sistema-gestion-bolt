@@ -39,10 +39,10 @@ export default function Reportes({ nombreEmpresa }: Props) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <h1 className="text-xl font-bold text-[#f0f0f0] tracking-tight">Reportes</h1>
-        <button onClick={exportarPlanilla} className="flex items-center gap-2 border border-[#9d7ff050] text-[#9d7ff0] text-sm font-medium px-4 py-2 rounded-lg hover:bg-[#9d7ff010] transition-colors">
-          <Download size={15} /> Exportar planilla PDF
+        <button onClick={exportarPlanilla} className="shrink-0 flex items-center gap-2 border border-[#9d7ff050] text-[#9d7ff0] text-sm font-medium px-4 py-2 rounded-lg hover:bg-[#9d7ff010] transition-colors">
+          <Download size={15} /> <span className="hidden sm:inline">Exportar planilla PDF</span><span className="sm:hidden">PDF</span>
         </button>
       </div>
 
