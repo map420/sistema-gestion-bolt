@@ -38,10 +38,9 @@ export default function Pagos() {
     const { trabajador, pago } = comprobanteTarget
     exportar(
       `comprobante-${trabajador.id}`,
-      `Comprobante-${trabajador.nombre.replace(/\s+/g, '-')}-Folio${pago.folio}.pdf`
-    )
-    setComprobanteTarget(null)
-  }, [comprobanteTarget])
+      `Comprobante-${trabajador.nombre.replace(/\s+/g, '-')}-Folio${pago.folio}`
+    )?.then(() => setComprobanteTarget(null))
+  }, [comprobanteTarget, exportar])
 
   const generarComprobante = (t: Trabajador) => {
     const pagosT = data.pagos
