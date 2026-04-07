@@ -8,7 +8,11 @@ body {
   font-family: system-ui, sans-serif;
 }
 
-/* iOS safe area para PWA standalone */
+/* iOS safe areas para PWA standalone */
 .bottom-nav-safe {
   padding-bottom: max(12px, env(safe-area-inset-bottom));
+}
+
+.safe-top {
+  padding-top: env(safe-area-inset-top);
 }

@@ -20,7 +20,7 @@ export default function App() {
       <Sidebar activa={seccion} onChange={setSeccion} config={config} />
 
       {/* Main content */}
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto safe-top">
         <div className="max-w-3xl mx-auto px-4 py-6 md:px-8 md:py-10 pb-28 md:pb-10">
           {seccion === 'trabajadores'  && <Trabajadores />}
           {seccion === 'registro'      && <RegistroDiario />}

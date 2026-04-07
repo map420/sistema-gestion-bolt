@@ -23,7 +23,7 @@ export default function Sidebar({ activa, onChange, config }: Props) {
     : 'CE'
 
   return (
-    <aside className="hidden md:flex w-56 shrink-0 flex-col h-screen sticky top-0 bg-[#0d0d0d] border-r border-white/[0.06]">
+    <aside className="hidden md:flex w-56 shrink-0 flex-col h-screen sticky top-0 bg-[#0d0d0d] border-r border-white/[0.06] safe-top">
 
       {/* Brand */}
       <div className="px-5 py-5 border-b border-white/[0.06]">
