@@ -1,11 +1,13 @@
 // src/components/pagos/Pagos.tsx
 import { useState } from 'react'
-import { Eye, DollarSign } from 'lucide-react'
+import { Eye, DollarSign, FileText } from 'lucide-react'
 import type { Trabajador, Pago } from '../../types'
 import { loadData, updateData } from '../../storage'
 import { calcularSaldo, formatMoneda, semanaActual, quincenaActual } from '../../utils'
+import { usePDF } from '../../hooks/usePDF'
 import PagoModal from './PagoModal'
 import DetalleModal from './DetalleModal'
+import ComprobanteTemplate from '../pdf/ComprobanteTemplate'
 
 type ModoPeriodo = 'semana' | 'quincena' | 'personalizado'
 
@@ -15,6 +17,8 @@ export default function Pagos() {
   const [periodoCustom, setPeriodoCustom] = useState({ desde: '', hasta: '' })
   const [pagoModal, setPagoModal] = useState<Trabajador | null>(null)
   const [detalleModal, setDetalleModal] = useState<Trabajador | null>(null)
+  const [comprobanteTarget, setComprobanteTarget] = useState<{ trabajador: Trabajador; pago: Pago } | null>(null)
+  const { exportar } = usePDF()
 
   const periodo = modo === 'semana' ? semanaActual() : modo === 'quincena' ? quincenaActual() : periodoCustom
   const trabajadores = data.trabajadores.filter(t => t.activo)
@@ -23,6 +27,18 @@ export default function Pagos() {
     const next = updateData(d => { d.pagos.push(pago); return d })
     setData(next)
     setPagoModal(null)
+  }
+
+  const generarComprobante = (t: Trabajador) => {
+    const pagosT = data.pagos
+      .filter(p => p.trabajadorId === t.id && p.fecha >= periodo.desde && p.fecha <= periodo.hasta)
+      .sort((a, b) => b.folio - a.folio)
+    const ultimoPago = pagosT[0]
+    if (!ultimoPago) return
+    setComprobanteTarget({ trabajador: t, pago: ultimoPago })
+    setTimeout(() => {
+      exportar(`comprobante-${t.id}`, `comprobante-${t.nombre.replace(/\s+/g, '-')}-${ultimoPago.folio}`)
+    }, 100)
   }
 
   return (
@@ -76,6 +92,9 @@ export default function Pagos() {
                   <button onClick={() => setPagoModal(t)} disabled={sinDeuda} className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold transition-colors ${sinDeuda ? 'bg-[#1a1a1a] text-[#333] cursor-not-allowed' : 'bg-[#9d7ff0] text-white hover:bg-[#8b6fd4]'}`}>
                     <DollarSign size={13} /> Registrar pago
                   </button>
+                  <button onClick={() => generarComprobante(t)} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs border border-white/10 text-[#555] hover:text-[#aaa]">
+                    <FileText size={13} /> Comprobante
+                  </button>
                 </div>
               </div>
             )
@@ -99,6 +118,22 @@ export default function Pagos() {
           periodo={periodo}
           onCerrar={() => setDetalleModal(null)}
         />
+      )}
+
+      {/* Hidden PDF template */}
+      {comprobanteTarget && (
+        <div style={{ position: 'absolute', left: '-9999px', top: 0 }}>
+          <ComprobanteTemplate
+            id={`comprobante-${comprobanteTarget.trabajador.id}`}
+            trabajador={comprobanteTarget.trabajador}
+            registros={data.registros.filter(r =>
+              r.trabajadorId === comprobanteTarget.trabajador.id &&
+              r.fecha >= comprobanteTarget.pago.periodo.desde &&
+              r.fecha <= comprobanteTarget.pago.periodo.hasta
+            )}
+            pago={comprobanteTarget.pago}
+          />
+        </div>
       )}
     </div>
   )
