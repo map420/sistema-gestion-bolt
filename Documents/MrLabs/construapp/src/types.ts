@@ -34,3 +34,8 @@ export interface AppData {
   registros: Registro[]
   pagos: Pago[]
 }
+
+export interface Config {
+  nombreEmpresa: string
+  logoDataUrl: string
+}

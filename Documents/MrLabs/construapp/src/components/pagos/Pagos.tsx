@@ -11,7 +11,11 @@ import ComprobanteTemplate from '../pdf/ComprobanteTemplate'
 
 type ModoPeriodo = 'semana' | 'quincena' | 'personalizado'
 
-export default function Pagos() {
+interface Props {
+  nombreEmpresa: string
+}
+
+export default function Pagos({ nombreEmpresa }: Props) {
   const [data, setData] = useState(() => loadData())
   const [modo, setModo] = useState<ModoPeriodo>('semana')
   const [periodoCustom, setPeriodoCustom] = useState({ desde: '', hasta: '' })
@@ -146,6 +150,7 @@ export default function Pagos() {
               r.fecha <= comprobanteTarget.pago.periodo.hasta
             )}
             pago={comprobanteTarget.pago}
+            nombreEmpresa={nombreEmpresa}
           />
         </div>
       )}

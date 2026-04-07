@@ -8,7 +8,11 @@ import PlanillaTemplate from '../pdf/PlanillaTemplate'
 
 type ModoPeriodo = 'semana' | 'quincena' | 'personalizado'
 
-export default function Reportes() {
+interface Props {
+  nombreEmpresa: string
+}
+
+export default function Reportes({ nombreEmpresa }: Props) {
   const [data] = useState(() => loadData())
   const [modo, setModo] = useState<ModoPeriodo>('semana')
   const [periodoCustom, setPeriodoCustom] = useState({ desde: '', hasta: '' })
@@ -103,6 +107,7 @@ export default function Reportes() {
           registros={data.registros}
           pagos={data.pagos}
           periodo={periodo}
+          nombreEmpresa={nombreEmpresa}
         />
       </div>
     </div>

@@ -1,4 +1,4 @@
-import type { AppData } from './types'
+import type { AppData, Config } from './types'
 
 const KEY = 'construapp_data'
 
@@ -27,4 +27,21 @@ export function updateData(updater: (data: AppData) => AppData): AppData {
   const next = updater(current)
   saveData(next)
   return next
+}
+
+const CONFIG_KEY = 'construapp_config'
+const defaultConfig: Config = { nombreEmpresa: '', logoDataUrl: '' }
+
+export function loadConfig(): Config {
+  try {
+    const raw = localStorage.getItem(CONFIG_KEY)
+    if (!raw) return { ...defaultConfig }
+    return JSON.parse(raw) as Config
+  } catch {
+    return { ...defaultConfig }
+  }
+}
+
+export function saveConfig(config: Config): void {
+  localStorage.setItem(CONFIG_KEY, JSON.stringify(config))
 }
