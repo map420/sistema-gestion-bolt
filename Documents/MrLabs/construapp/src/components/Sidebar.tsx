@@ -1,9 +1,10 @@
 // src/components/Sidebar.tsx
 import { useTranslation } from 'react-i18next'
-import { Users, ClipboardList, DollarSign, BarChart2, Settings, Building2, type LucideIcon } from 'lucide-react'
+import { Users, ClipboardList, DollarSign, BarChart2, Settings, Building2, FolderKanban, LogOut, type LucideIcon } from 'lucide-react'
 import type { Config } from '../types'
+import { useAuth } from '../context/AuthContext'
 
-export type Seccion = 'trabajadores' | 'registro' | 'pagos' | 'reportes' | 'configuracion'
+export type Seccion = 'trabajadores' | 'registro' | 'proyectos' | 'pagos' | 'reportes' | 'configuracion'
 
 interface Props {
   activa: Seccion
@@ -13,10 +14,12 @@ interface Props {
 
 export default function Sidebar({ activa, onChange, config }: Props) {
   const { t } = useTranslation()
+  const { user, logout } = useAuth()
 
   const NAV_ITEMS: { key: Seccion; label: string; Icon: LucideIcon }[] = [
     { key: 'trabajadores', label: t('nav.workers'),   Icon: Users },
     { key: 'registro',     label: t('nav.daily'),     Icon: ClipboardList },
+    { key: 'proyectos',    label: t('nav.projects'),  Icon: FolderKanban },
     { key: 'pagos',        label: t('nav.payments'),  Icon: DollarSign },
     { key: 'reportes',     label: t('nav.reports'),   Icon: BarChart2 },
   ]
@@ -72,8 +75,8 @@ export default function Sidebar({ activa, onChange, config }: Props) {
         })}
       </nav>
 
-      {/* Settings at bottom */}
-      <div className="px-3 pb-4 border-t border-white/[0.06] pt-3">
+      {/* Settings + User at bottom */}
+      <div className="px-3 pb-4 border-t border-white/[0.06] pt-3 flex flex-col gap-0.5">
         <button
           onClick={() => onChange('configuracion')}
           className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-left group ${
@@ -88,6 +91,22 @@ export default function Sidebar({ activa, onChange, config }: Props) {
           />
           {t('nav.settings')}
         </button>
+
+        {/* User info + logout */}
+        {user && (
+          <div className="flex items-center gap-2 px-3 py-2 mt-1">
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-[#555] truncate">{user.nombre}</p>
+            </div>
+            <button
+              onClick={logout}
+              title={t('auth.logout')}
+              className="p-1.5 text-[#555] hover:text-[#f87171] rounded-lg hover:bg-white/5 transition-colors shrink-0"
+            >
+              <LogOut size={14} />
+            </button>
+          </div>
+        )}
       </div>
     </aside>
   )

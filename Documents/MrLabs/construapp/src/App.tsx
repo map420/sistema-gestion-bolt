@@ -7,7 +7,10 @@ import RegistroDiario from './components/registro/RegistroDiario'
 import Pagos from './components/pagos/Pagos'
 import Reportes from './components/reportes/Reportes'
 import Configuracion from './components/configuracion/Configuracion'
+import Proyectos from './components/proyectos/Proyectos'
+import Login from './components/auth/Login'
 import { ConfigProvider, useConfig } from './context/ConfigContext'
+import { AuthProvider, useAuth } from './context/AuthContext'
 
 function AppShell() {
   const [seccion, setSeccion] = useState<Seccion>('trabajadores')
@@ -21,6 +24,7 @@ function AppShell() {
         <div className="max-w-3xl mx-auto px-4 py-6 md:px-8 md:py-10 pb-28 md:pb-10">
           {seccion === 'trabajadores'  && <Trabajadores />}
           {seccion === 'registro'      && <RegistroDiario />}
+          {seccion === 'proyectos'     && <Proyectos />}
           {seccion === 'pagos'         && <Pagos nombreEmpresa={config.nombreEmpresa || 'Mi Empresa'} />}
           {seccion === 'reportes'      && <Reportes nombreEmpresa={config.nombreEmpresa || 'Mi Empresa'} />}
           {seccion === 'configuracion' && <Configuracion config={config} onSave={updateConfig} />}
@@ -32,10 +36,18 @@ function AppShell() {
   )
 }
 
+function AppContent() {
+  const { user } = useAuth()
+  if (!user) return <Login />
+  return <AppShell />
+}
+
 export default function App() {
   return (
-    <ConfigProvider>
-      <AppShell />
-    </ConfigProvider>
+    <AuthProvider>
+      <ConfigProvider>
+        <AppContent />
+      </ConfigProvider>
+    </AuthProvider>
   )
 }

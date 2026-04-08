@@ -2,6 +2,7 @@
   "nav": {
     "workers": "Workers",
     "daily": "Daily Log",
+    "projects": "Projects",
     "payments": "Payments",
     "reports": "Reports",
     "settings": "Settings",
@@ -11,9 +12,44 @@
   "bottom": {
     "staff": "Staff",
     "log": "Log",
+    "projects": "Projects",
     "payments": "Payments",
     "reports": "Reports",
     "config": "Config"
+  },
+  "auth": {
+    "login": "Sign in",
+    "register": "Create account",
+    "username": "Username",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "loginBtn": "Sign in",
+    "registerBtn": "Register",
+    "switchToRegister": "No account? Create one",
+    "switchToLogin": "Already have an account? Sign in",
+    "errUserExists": "User already exists",
+    "errUserNotFound": "User not found",
+    "errWrongPassword": "Wrong password",
+    "errPasswordMismatch": "Passwords do not match",
+    "errRequired": "All fields are required",
+    "logout": "Sign out"
+  },
+  "projects": {
+    "title": "Projects",
+    "nActive": "{{count}} active",
+    "newProject": "New project",
+    "new": "New",
+    "noProjects": "No projects registered.",
+    "addFirst": "Add first project",
+    "active": "Active",
+    "inactive": "Inactive",
+    "name": "Project name",
+    "namePh": "E.g. North Tower",
+    "description": "Description (optional)",
+    "descPh": "E.g. 5-floor construction",
+    "color": "Color",
+    "editTitle": "Edit project",
+    "newTitle": "New project"
   },
   "workers": {
     "title": "Workers",
@@ -59,7 +95,11 @@
     "totalLabel": "Total",
     "actPh": "E.g.: Column pour — Block B",
     "day": "day",
-    "hour": "hour"
+    "hour": "hour",
+    "addProject": "Add",
+    "project": "Project",
+    "noProject": "No project",
+    "removeEntry": "Remove"
   },
   "payments": {
     "title": "Payments",
@@ -114,7 +154,11 @@
     "earned": "Earned",
     "paid": "Paid",
     "pending": "Pending",
-    "totals": "Totals"
+    "totals": "Totals",
+    "byWorker": "By worker",
+    "byProject": "By project",
+    "noProjectData": "No project data in this period.",
+    "totalCost": "Total cost"
   },
   "settings": {
     "title": "Settings",

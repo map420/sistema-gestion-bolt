@@ -2,6 +2,7 @@
   "nav": {
     "workers": "Trabajadores",
     "daily": "Registro diario",
+    "projects": "Proyectos",
     "payments": "Pagos",
     "reports": "Reportes",
     "settings": "Configuración",
@@ -11,9 +12,44 @@
   "bottom": {
     "staff": "Personal",
     "log": "Registro",
+    "projects": "Proyectos",
     "payments": "Pagos",
     "reports": "Reportes",
     "config": "Config"
+  },
+  "auth": {
+    "login": "Iniciar sesión",
+    "register": "Crear cuenta",
+    "username": "Usuario",
+    "password": "Contraseña",
+    "confirmPassword": "Confirmar contraseña",
+    "loginBtn": "Entrar",
+    "registerBtn": "Registrarse",
+    "switchToRegister": "¿No tienes cuenta? Crear cuenta",
+    "switchToLogin": "¿Ya tienes cuenta? Iniciar sesión",
+    "errUserExists": "El usuario ya existe",
+    "errUserNotFound": "Usuario no encontrado",
+    "errWrongPassword": "Contraseña incorrecta",
+    "errPasswordMismatch": "Las contraseñas no coinciden",
+    "errRequired": "Todos los campos son obligatorios",
+    "logout": "Cerrar sesión"
+  },
+  "projects": {
+    "title": "Proyectos",
+    "nActive": "{{count}} activos",
+    "newProject": "Nuevo proyecto",
+    "new": "Nuevo",
+    "noProjects": "No hay proyectos registrados.",
+    "addFirst": "Agregar primer proyecto",
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "name": "Nombre del proyecto",
+    "namePh": "Ej. Torre Norte",
+    "description": "Descripción (opcional)",
+    "descPh": "Ej. Construcción de 5 pisos",
+    "color": "Color",
+    "editTitle": "Editar proyecto",
+    "newTitle": "Nuevo proyecto"
   },
   "workers": {
     "title": "Trabajadores",
@@ -59,7 +95,11 @@
     "totalLabel": "Total",
     "actPh": "Ej: Colada de columnas — Bloque B",
     "day": "día",
-    "hour": "hora"
+    "hour": "hora",
+    "addProject": "Agregar",
+    "project": "Proyecto",
+    "noProject": "Sin proyecto",
+    "removeEntry": "Quitar"
   },
   "payments": {
     "title": "Pagos",
@@ -114,7 +154,11 @@
     "earned": "Devengado",
     "paid": "Pagado",
     "pending": "Pendiente",
-    "totals": "Totales"
+    "totals": "Totales",
+    "byWorker": "Por trabajador",
+    "byProject": "Por proyecto",
+    "noProjectData": "Sin datos de proyecto en este período.",
+    "totalCost": "Costo total"
   },
   "settings": {
     "title": "Configuración",

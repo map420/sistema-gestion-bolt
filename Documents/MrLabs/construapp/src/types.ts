@@ -10,6 +10,14 @@ export interface Trabajador {
   activo: boolean
 }
 
+export interface Proyecto {
+  id: string
+  nombre: string
+  color: string
+  descripcion?: string
+  activo: boolean
+}
+
 export interface Registro {
   id: string
   trabajadorId: string
@@ -17,6 +25,7 @@ export interface Registro {
   cantidad: number     // horas o días
   actividad: string
   montoCalculado: number
+  proyectoId?: string
 }
 
 export interface Pago {
@@ -33,6 +42,13 @@ export interface AppData {
   trabajadores: Trabajador[]
   registros: Registro[]
   pagos: Pago[]
+  proyectos: Proyecto[]
+}
+
+export interface Usuario {
+  id: string
+  nombre: string
+  passwordHash: string
 }
 
 export type Idioma = 'es' | 'en' | 'pt'
