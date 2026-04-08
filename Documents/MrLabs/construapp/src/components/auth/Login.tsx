@@ -104,6 +104,12 @@ export default function Login() {
             </div>
           )}
 
+          {mode === 'register' && (
+            <div className="bg-[#9d7ff010] border border-[#9d7ff030] rounded-lg px-4 py-3 text-xs text-[#aaa]">
+              Incluye 15 días de prueba gratuita. Después, acceso vitalicio por <span className="text-[#9d7ff0] font-semibold">$99 USD</span> (pago único).
+            </div>
+          )}
+
           {error && (
             <p className="text-xs text-[#f87171] bg-[#f8717110] border border-[#f8717130] rounded-lg px-3 py-2">
               {error}

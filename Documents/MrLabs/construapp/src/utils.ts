@@ -69,3 +69,11 @@ export function siguienteFolio(pagos: import('./types').Pago[]): number {
   if (pagos.length === 0) return 1
   return Math.max(...pagos.map(p => p.folio)) + 1
 }
+
+export function getTrialStatus(user: { creadoEn?: string; paidAt?: string }) {
+  if (user.paidAt) return { paid: true, inTrial: false, expired: false, daysRemaining: 0 }
+  if (!user.creadoEn) return { paid: false, inTrial: true, expired: false, daysRemaining: 15 }
+  const daysPassed = Math.floor((Date.now() - new Date(user.creadoEn).getTime()) / 86_400_000)
+  const daysRemaining = Math.max(0, 15 - daysPassed)
+  return { paid: false, inTrial: daysRemaining > 0, expired: daysRemaining === 0, daysRemaining }
+}

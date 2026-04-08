@@ -9,16 +9,22 @@ import Reportes from './components/reportes/Reportes'
 import Configuracion from './components/configuracion/Configuracion'
 import Proyectos from './components/proyectos/Proyectos'
 import Login from './components/auth/Login'
+import Paywall from './components/paywall/Paywall'
+import PaymentSuccess from './components/paywall/PaymentSuccess'
 import { ConfigProvider, useConfig } from './context/ConfigContext'
 import { AuthProvider, useAuth } from './context/AuthContext'
 
-function AppShell() {
+interface AppShellProps {
+  trialDaysRemaining: number | null
+}
+
+function AppShell({ trialDaysRemaining }: AppShellProps) {
   const [seccion, setSeccion] = useState<Seccion>('trabajadores')
   const { config, updateConfig } = useConfig()
 
   return (
     <div className="flex min-h-screen bg-[#080808] text-[#f0f0f0]">
-      <Sidebar activa={seccion} onChange={setSeccion} config={config} />
+      <Sidebar activa={seccion} onChange={setSeccion} config={config} trialDaysRemaining={trialDaysRemaining} />
 
       <main className="flex-1 overflow-y-auto safe-top">
         <div className="max-w-3xl mx-auto px-4 py-6 md:px-8 md:py-10 pb-28 md:pb-10">
@@ -37,12 +43,24 @@ function AppShell() {
 }
 
 function AppContent() {
-  const { user } = useAuth()
+  const { user, trialStatus, confirmPayment } = useAuth()
+
+  // Handle payment success redirect from Stripe
+  const params = new URLSearchParams(window.location.search)
+  const paymentStatus = params.get('payment')
+  const sessionId = params.get('session_id')
+
   if (!user) return <Login />
-  // key={user.id} forces ConfigProvider to remount fresh for each user
+
+  if (paymentStatus === 'success' && sessionId) {
+    return <PaymentSuccess sessionId={sessionId} onConfirm={confirmPayment} />
+  }
+
+  if (trialStatus?.expired) return <Paywall userId={user.id} />
+
   return (
     <ConfigProvider key={user.id}>
-      <AppShell />
+      <AppShell trialDaysRemaining={trialStatus?.inTrial ? trialStatus.daysRemaining : null} />
     </ConfigProvider>
   )
 }

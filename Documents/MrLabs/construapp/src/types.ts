@@ -49,6 +49,9 @@ export interface Usuario {
   id: string
   nombre: string
   passwordHash: string
+  creadoEn: string
+  paidAt?: string
+  stripeSessionId?: string
 }
 
 export type Idioma = 'es' | 'en' | 'pt'

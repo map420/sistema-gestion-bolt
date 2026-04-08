@@ -175,6 +175,23 @@
     "save": "Guardar configuración",
     "saved": "¡Guardado!"
   },
+  "paywall": {
+    "title": "Tu prueba gratuita ha terminado",
+    "subtitle": "Activa tu acceso vitalicio con un único pago",
+    "price": "$99 USD",
+    "priceNote": "Pago único · Sin suscripciones · Acceso para siempre",
+    "feature1": "Proyectos y trabajadores ilimitados",
+    "feature2": "Reportes y comprobantes en PDF",
+    "feature3": "Tus datos, en tu dispositivo",
+    "cta": "Activar acceso vitalicio",
+    "loading": "Redirigiendo a pago seguro...",
+    "error": "Error al procesar. Intenta de nuevo.",
+    "logout": "Cerrar sesión",
+    "verifying": "Verificando pago...",
+    "success": "¡Acceso activado!",
+    "successSub": "Ya puedes usar ConstruApp sin límites.",
+    "trialBadge": "{{count}} días de prueba"
+  },
   "pdf": {
     "payroll": "PLANILLA DE PAGO",
     "period": "Período:",

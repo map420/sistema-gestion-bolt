@@ -1,5 +1,7 @@
 import type { AppData, Config, Usuario } from './types'
 
+export const TRIAL_DAYS = 15
+
 // ─── Current user (module-level) ─────────────────────────────────────────────
 let _currentUserId: string | null = null
 
@@ -120,6 +122,7 @@ export function registerUser(nombre: string, password: string): { ok: boolean; e
     id: crypto.randomUUID(),
     nombre: nombre_trim,
     passwordHash: hashPassword(password),
+    creadoEn: new Date().toISOString(),
   }
 
   // Migrate old non-namespaced data if it exists
@@ -149,5 +152,25 @@ export function loginUser(nombre: string, password: string): { ok: boolean; user
 
   if (user.passwordHash !== hashPassword(password)) return { ok: false, error: 'errWrongPassword' }
 
+  // Backward compat: give old users a fresh 15-day trial from first login
+  if (!user.creadoEn) {
+    user.creadoEn = new Date().toISOString()
+    saveUsers(users)
+  }
+
   return { ok: true, user: { id: user.id, nombre: user.nombre } }
+}
+
+export function getFullUser(id: string): Usuario | null {
+  const users = getUsers()
+  return users.find(u => u.id === id) ?? null
+}
+
+export function markUserAsPaid(userId: string, stripeSessionId: string): void {
+  const users = getUsers()
+  const user = users.find(u => u.id === userId)
+  if (!user) return
+  user.paidAt = new Date().toISOString()
+  user.stripeSessionId = stripeSessionId
+  saveUsers(users)
 }

@@ -10,9 +10,10 @@ interface Props {
   activa: Seccion
   onChange: (s: Seccion) => void
   config: Config
+  trialDaysRemaining?: number | null
 }
 
-export default function Sidebar({ activa, onChange, config }: Props) {
+export default function Sidebar({ activa, onChange, config, trialDaysRemaining }: Props) {
   const { t } = useTranslation()
   const { user, logout } = useAuth()
 
@@ -91,6 +92,17 @@ export default function Sidebar({ activa, onChange, config }: Props) {
           />
           {t('nav.settings')}
         </button>
+
+        {/* Trial badge */}
+        {trialDaysRemaining !== null && trialDaysRemaining !== undefined && (
+          <div className={`mx-3 mb-1 px-3 py-1.5 rounded-lg text-xs font-medium text-center ${
+            trialDaysRemaining <= 3
+              ? 'text-[#f87171] bg-[#f8717115]'
+              : 'text-[#eab308] bg-[#eab30815]'
+          }`}>
+            {t('paywall.trialBadge', { count: trialDaysRemaining })}
+          </div>
+        )}
 
         {/* User info + logout */}
         {user && (

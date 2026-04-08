@@ -175,6 +175,23 @@
     "save": "Save settings",
     "saved": "Saved!"
   },
+  "paywall": {
+    "title": "Your free trial has ended",
+    "subtitle": "Activate lifetime access with a one-time payment",
+    "price": "$99 USD",
+    "priceNote": "One-time payment · No subscriptions · Access forever",
+    "feature1": "Unlimited projects and workers",
+    "feature2": "PDF reports and payment vouchers",
+    "feature3": "Your data, on your device",
+    "cta": "Activate lifetime access",
+    "loading": "Redirecting to secure payment...",
+    "error": "Error processing. Please try again.",
+    "logout": "Sign out",
+    "verifying": "Verifying payment...",
+    "success": "Access activated!",
+    "successSub": "You can now use ConstruApp without limits.",
+    "trialBadge": "{{count}} trial days"
+  },
   "pdf": {
     "payroll": "PAYROLL",
     "period": "Period:",
