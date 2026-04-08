@@ -2,7 +2,6 @@
 import { useState, useRef } from 'react'
 import { Building2, Upload, X, Check, Globe, DollarSign } from 'lucide-react'
 import type { Config, Idioma, Moneda } from '../../types'
-import { saveConfig } from '../../storage'
 
 interface Props {
   config: Config
@@ -79,8 +78,7 @@ export default function Configuracion({ config, onSave }: Props) {
 
   const handleGuardar = () => {
     const next: Config = { nombreEmpresa: nombre.trim(), logoDataUrl, idioma, moneda }
-    saveConfig(next)
-    onSave(next)
+    onSave(next) // updateConfig: guarda en localStorage y actualiza el contexto
     setGuardado(true)
     setTimeout(() => setGuardado(false), 2000)
   }

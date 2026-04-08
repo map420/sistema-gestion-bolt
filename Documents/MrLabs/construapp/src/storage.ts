@@ -41,7 +41,9 @@ export function loadConfig(): Config {
   try {
     const raw = localStorage.getItem(CONFIG_KEY)
     if (!raw) return { ...defaultConfig }
-    return JSON.parse(raw) as Config
+    // Merge with defaults so configs guardados antes de añadir nuevos campos
+    // (idioma, moneda) reciban los valores por defecto en lugar de undefined.
+    return { ...defaultConfig, ...JSON.parse(raw) }
   } catch {
     return { ...defaultConfig }
   }
