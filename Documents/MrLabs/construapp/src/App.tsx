@@ -1,5 +1,7 @@
 // src/App.tsx
 import { useState } from 'react'
+import { X } from 'lucide-react'
+import type { Config } from './types'
 import Sidebar, { type Seccion } from './components/Sidebar'
 import BottomNav from './components/BottomNav'
 import Trabajadores from './components/trabajadores/Trabajadores'
@@ -22,27 +24,58 @@ interface AppShellProps {
 
 function AppShell({ trialDaysRemaining }: AppShellProps) {
   const [seccion, setSeccion] = useState<Seccion>('trabajadores')
+  const [showConfig, setShowConfig] = useState(false)
   const { config, updateConfig } = useConfig()
+
+  const handleNav = (s: Seccion) => {
+    if (s === 'configuracion') { setShowConfig(true); return }
+    setSeccion(s)
+  }
+
+  const handleSave = (next: Config) => {
+    updateConfig(next)
+    setShowConfig(false)
+  }
 
   return (
     <div className="flex min-h-screen bg-[#080808] text-[#f0f0f0]">
-      <Sidebar activa={seccion} onChange={setSeccion} config={config} trialDaysRemaining={trialDaysRemaining} />
+      <Sidebar activa={seccion} onChange={handleNav} config={config} />
 
       <main className="flex-1 overflow-y-auto safe-top">
         <div className="max-w-3xl mx-auto px-4 py-6 md:px-8 md:py-10 pb-28 md:pb-10">
           {trialDaysRemaining !== null && (
             <TrialBanner daysRemaining={trialDaysRemaining} />
           )}
-          {seccion === 'trabajadores'  && <Trabajadores />}
-          {seccion === 'registro'      && <RegistroDiario />}
-          {seccion === 'proyectos'     && <Proyectos />}
-          {seccion === 'pagos'         && <Pagos nombreEmpresa={config.nombreEmpresa || 'Mi Empresa'} />}
-          {seccion === 'reportes'      && <Reportes nombreEmpresa={config.nombreEmpresa || 'Mi Empresa'} />}
-          {seccion === 'configuracion' && <Configuracion config={config} onSave={updateConfig} />}
+          {seccion === 'trabajadores' && <Trabajadores />}
+          {seccion === 'registro'     && <RegistroDiario />}
+          {seccion === 'proyectos'    && <Proyectos />}
+          {seccion === 'pagos'        && <Pagos nombreEmpresa={config.nombreEmpresa || 'Mi Empresa'} />}
+          {seccion === 'reportes'     && <Reportes nombreEmpresa={config.nombreEmpresa || 'Mi Empresa'} />}
         </div>
       </main>
 
-      <BottomNav activa={seccion} onChange={setSeccion} />
+      <BottomNav activa={seccion} onChange={handleNav} />
+
+      {/* Config modal */}
+      {showConfig && (
+        <div
+          className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center px-4"
+          onClick={() => setShowConfig(false)}
+        >
+          <div
+            className="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-[#0d0d0d] border border-white/10 rounded-2xl"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-6 pt-5 pb-0">
+              <h2 className="text-base font-semibold text-[#f0f0f0]">Configuración</h2>
+              <button onClick={() => setShowConfig(false)} className="p-1.5 text-[#555] hover:text-[#aaa] rounded-lg hover:bg-white/5 transition-colors">
+                <X size={16} />
+              </button>
+            </div>
+            <Configuracion config={config} onSave={handleSave} />
+          </div>
+        </div>
+      )}
     </div>
   )
 }

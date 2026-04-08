@@ -1,6 +1,6 @@
 // src/components/BottomNav.tsx
 import { useTranslation } from 'react-i18next'
-import { Users, ClipboardList, DollarSign, BarChart2, FolderKanban, type LucideIcon } from 'lucide-react'
+import { Users, ClipboardList, DollarSign, BarChart2, FolderKanban, Settings, type LucideIcon } from 'lucide-react'
 import type { Seccion } from './Sidebar'
 
 interface Props {
@@ -12,11 +12,12 @@ export default function BottomNav({ activa, onChange }: Props) {
   const { t } = useTranslation()
 
   const ITEMS: { key: Seccion; label: string; Icon: LucideIcon }[] = [
-    { key: 'trabajadores', label: t('bottom.staff'),    Icon: Users },
-    { key: 'registro',     label: t('bottom.log'),      Icon: ClipboardList },
-    { key: 'proyectos',    label: t('bottom.projects'), Icon: FolderKanban },
-    { key: 'pagos',        label: t('bottom.payments'), Icon: DollarSign },
-    { key: 'reportes',     label: t('bottom.reports'),  Icon: BarChart2 },
+    { key: 'trabajadores',  label: t('bottom.staff'),    Icon: Users },
+    { key: 'registro',      label: t('bottom.log'),      Icon: ClipboardList },
+    { key: 'proyectos',     label: t('bottom.projects'), Icon: FolderKanban },
+    { key: 'pagos',         label: t('bottom.payments'), Icon: DollarSign },
+    { key: 'reportes',      label: t('bottom.reports'),  Icon: BarChart2 },
+    { key: 'configuracion', label: t('bottom.config'),   Icon: Settings },
   ]
 
   return (

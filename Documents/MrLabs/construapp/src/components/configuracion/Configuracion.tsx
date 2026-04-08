@@ -59,13 +59,10 @@ export default function Configuracion({ config, onSave }: Props) {
   const monedaActual = MONEDAS.find(m => m.codigo === monedaCodigo) ?? MONEDAS[0]
 
   return (
-    <div className="flex flex-col gap-8">
-      <div>
-        <h1 className="text-xl font-bold text-[#f0f0f0] tracking-tight">{t('settings.title')}</h1>
-        <p className="text-sm text-[#444] mt-1">{t('settings.subtitle')}</p>
-      </div>
+    <div className="flex flex-col gap-6 p-6">
+      <p className="text-sm text-[#444]">{t('settings.subtitle')}</p>
 
-      <div className="bg-[#111] border border-white/5 rounded-2xl p-6 flex flex-col gap-6 max-w-lg">
+      <div className="flex flex-col gap-6">
 
         {/* Logo */}
         <div className="flex flex-col gap-3">
