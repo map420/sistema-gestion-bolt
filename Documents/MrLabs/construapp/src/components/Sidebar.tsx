@@ -13,7 +13,7 @@ interface Props {
   trialDaysRemaining?: number | null
 }
 
-export default function Sidebar({ activa, onChange, config, trialDaysRemaining }: Props) {
+export default function Sidebar({ activa, onChange, config }: Props) {
   const { t } = useTranslation()
   const { user, logout } = useAuth()
 
