@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Lock, CheckCircle } from 'lucide-react'
+import { Lock, Check, Loader2, LogOut } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 
 interface Props {
@@ -22,7 +22,7 @@ export default function Paywall({ userId }: Props) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId }),
       })
-      if (!res.ok) throw new Error('api error')
+      if (!res.ok) throw new Error()
       const data = await res.json() as { url: string }
       window.location.href = data.url
     } catch {
@@ -32,48 +32,45 @@ export default function Paywall({ userId }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-[#080808] flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
-        <div className="bg-[#111] border border-white/10 rounded-3xl p-8 flex flex-col items-center gap-6 text-center">
+    <div className="min-h-screen bg-[#07070a] flex items-center justify-center px-4 relative overflow-hidden">
+      <div className="absolute top-[-20%] left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full bg-[#7c5ff0] opacity-[0.05] blur-[120px] pointer-events-none" />
 
-          {/* Red lock icon */}
-          <div className="w-16 h-16 rounded-full bg-[#f8717115] border border-[#f8717130] flex items-center justify-center">
-            <Lock size={28} className="text-[#f87171]" />
+      <div className="w-full max-w-sm relative z-10">
+        <div className="bg-[#0f0f13] border border-white/[0.07] rounded-3xl p-8 flex flex-col items-center gap-6 text-center shadow-2xl shadow-black/50">
+
+          {/* Lock icon */}
+          <div className="w-16 h-16 rounded-2xl relative flex items-center justify-center">
+            <div className="absolute inset-0 bg-[#ff453a] opacity-10 rounded-2xl" />
+            <div className="absolute inset-[1px] bg-[#0f0f13] rounded-[14px]" />
+            <Lock size={24} className="text-[#ff453a] relative z-10" />
           </div>
 
           {/* Title */}
           <div className="flex flex-col gap-2">
-            <h1 className="text-2xl font-bold text-[#f0f0f0] leading-tight">
-              {t('paywall.title')}
-            </h1>
-            <p className="text-sm text-[#666]">
-              {t('paywall.subtitle')}
-            </p>
+            <h1 className="text-xl font-bold text-[#f2f2f7] leading-tight">{t('paywall.title')}</h1>
+            <p className="text-sm text-[#6b6b7a] leading-relaxed">{t('paywall.subtitle')}</p>
           </div>
 
           {/* Price */}
           <div className="flex flex-col gap-1">
-            <span className="text-4xl font-black text-[#9d7ff0]">
-              {t('paywall.price')}
-            </span>
-            <span className="text-xs text-[#555]">
-              {t('paywall.priceNote')}
-            </span>
+            <p className="text-4xl font-black text-[#f2f2f7]">{t('paywall.price')}</p>
+            <p className="text-xs text-[#6b6b7a]">{t('paywall.priceNote')}</p>
           </div>
 
           {/* Features */}
-          <div className="w-full flex flex-col gap-3 text-left">
-            {(['feature1', 'feature2', 'feature3'] as const).map((key) => (
+          <div className="w-full flex flex-col gap-2.5 text-left">
+            {(['feature1', 'feature2', 'feature3'] as const).map(key => (
               <div key={key} className="flex items-center gap-3">
-                <CheckCircle size={16} className="text-[#9d7ff0] shrink-0" />
-                <span className="text-sm text-[#aaa]">{t(`paywall.${key}`)}</span>
+                <div className="w-5 h-5 rounded-full bg-[#7c5ff020] flex items-center justify-center shrink-0">
+                  <Check size={11} className="text-[#a78bfa]" />
+                </div>
+                <span className="text-sm text-[#a0a0b0]">{t(`paywall.${key}`)}</span>
               </div>
             ))}
           </div>
 
-          {/* Error */}
           {error && (
-            <p className="w-full text-xs text-[#f87171] bg-[#f8717110] border border-[#f8717130] rounded-lg px-3 py-2">
+            <p className="w-full text-xs text-[#ff6b6b] bg-[#ff453a12] border border-[#ff453a25] rounded-xl px-4 py-3">
               {error}
             </p>
           )}
@@ -82,20 +79,14 @@ export default function Paywall({ userId }: Props) {
           <button
             onClick={handlePay}
             disabled={loading}
-            className="w-full bg-[#9d7ff0] hover:bg-[#8b6fd4] disabled:opacity-60 disabled:cursor-not-allowed text-white px-8 py-4 rounded-2xl text-lg font-bold transition-colors"
+            className="w-full accent-gradient text-white py-4 rounded-2xl text-base font-bold hover:opacity-90 disabled:opacity-50 transition-opacity shadow-xl shadow-[#7c5ff040] flex items-center justify-center gap-2"
           >
+            {loading ? <Loader2 size={18} className="animate-spin" /> : null}
             {loading ? t('paywall.loading') : t('paywall.cta')}
           </button>
 
-          <p className="text-xs text-[#444]">
-            {t('paywall.priceNote')}
-          </p>
-
-          {/* Logout link */}
-          <button
-            onClick={logout}
-            className="text-xs text-[#444] hover:text-[#888] transition-colors"
-          >
+          <button onClick={logout} className="flex items-center gap-1.5 text-xs text-[#38383f] hover:text-[#6b6b7a] transition-colors">
+            <LogOut size={12} />
             {t('paywall.logout')}
           </button>
         </div>

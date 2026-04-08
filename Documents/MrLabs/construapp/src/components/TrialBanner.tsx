@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { X } from 'lucide-react'
+import { X, Zap } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 
 interface Props {
@@ -31,56 +31,48 @@ export default function TrialBanner({ daysRemaining }: Props) {
     } catch { /* ignore */ }
   }
 
-  if (isUrgent) {
-    return (
-      <div className="border border-amber-500/30 bg-amber-500/10 rounded-xl px-4 py-3 mb-4 flex items-start gap-3">
-        <div className="flex-1 flex flex-col gap-1">
-          <span className="text-sm font-semibold text-amber-400">
-            {t('trial.warning', { count: daysRemaining })}
-          </span>
-          <button
-            onClick={handleActivate}
-            className="text-xs text-amber-300 hover:text-amber-200 hover:underline text-left transition-colors w-fit"
-          >
-            {t('trial.activate')}
-          </button>
-        </div>
-        <button
-          onClick={() => setDismissed(true)}
-          className="text-amber-600 hover:text-amber-400 transition-colors mt-0.5 shrink-0"
-        >
-          <X size={14} />
-        </button>
-      </div>
-    )
-  }
-
   return (
-    <div className="border border-emerald-500/20 bg-emerald-500/10 rounded-xl px-4 py-3 mb-4 flex items-start gap-3">
-      <div className="flex-1 flex flex-col gap-1.5">
-        <div className="flex items-center justify-between gap-2">
-          <span className="text-sm font-semibold text-emerald-400">
-            {t('trial.active', { count: daysRemaining })}
-          </span>
-          <button
-            onClick={handleActivate}
-            className="text-xs text-emerald-300 hover:text-emerald-200 hover:underline transition-colors whitespace-nowrap shrink-0"
-          >
-            {t('trial.buyNow')}
-          </button>
-        </div>
-        <div className="h-1 bg-white/10 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-emerald-500 rounded-full transition-all"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
+    <div className={`rounded-2xl px-4 py-3 mb-4 flex items-center gap-3 ${
+      isUrgent
+        ? 'bg-[#ffa80012] border border-[#ffa80025]'
+        : 'bg-[#7c5ff010] border border-[#7c5ff025]'
+    }`}>
+      <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
+        isUrgent ? 'bg-[#ffa80020]' : 'bg-[#7c5ff020]'
+      }`}>
+        <Zap size={14} className={isUrgent ? 'text-[#ffa800]' : 'text-[#a78bfa]'} />
       </div>
+
+      <div className="flex-1 flex flex-col gap-1.5 min-w-0">
+        <p className={`text-xs font-semibold ${isUrgent ? 'text-[#ffa800]' : 'text-[#a78bfa]'}`}>
+          {isUrgent ? t('trial.warning', { count: daysRemaining }) : t('trial.active', { count: daysRemaining })}
+        </p>
+        {!isUrgent && (
+          <div className="h-1 bg-white/[0.06] rounded-full overflow-hidden">
+            <div
+              className="h-full accent-gradient rounded-full transition-all"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        )}
+      </div>
+
+      <button
+        onClick={handleActivate}
+        className={`text-[11px] font-semibold px-3 py-1.5 rounded-lg whitespace-nowrap shrink-0 transition-all ${
+          isUrgent
+            ? 'bg-[#ffa800] text-black hover:bg-[#ffb733]'
+            : 'accent-gradient text-white hover:opacity-90'
+        }`}
+      >
+        {isUrgent ? t('trial.activate').replace(' →', '') : t('trial.buyNow').replace(' →', '')}
+      </button>
+
       <button
         onClick={() => setDismissed(true)}
-        className="text-emerald-700 hover:text-emerald-500 transition-colors mt-0.5 shrink-0"
+        className="text-[#38383f] hover:text-[#6b6b7a] transition-colors shrink-0"
       >
-        <X size={14} />
+        <X size={13} />
       </button>
     </div>
   )

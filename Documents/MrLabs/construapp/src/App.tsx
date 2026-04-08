@@ -38,10 +38,10 @@ function AppShell({ trialDaysRemaining }: AppShellProps) {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#080808] text-[#f0f0f0]">
+    <div className="flex min-h-screen bg-[#07070a] text-[#f2f2f7]">
       <Sidebar activa={seccion} onChange={handleNav} config={config} />
 
-      <main className="flex-1 overflow-y-auto safe-top">
+      <main className="flex-1 overflow-y-auto safe-top bg-[#07070a]">
         <div className="max-w-3xl mx-auto px-4 py-6 md:px-8 md:py-10 pb-28 md:pb-10">
           {trialDaysRemaining !== null && (
             <TrialBanner daysRemaining={trialDaysRemaining} />
@@ -63,13 +63,13 @@ function AppShell({ trialDaysRemaining }: AppShellProps) {
           onClick={() => setShowConfig(false)}
         >
           <div
-            className="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-[#0d0d0d] border border-white/10 rounded-2xl"
+            className="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-[#0f0f13] border border-white/[0.07] rounded-2xl shadow-2xl shadow-black/60"
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center justify-between px-6 pt-5 pb-0">
-              <h2 className="text-base font-semibold text-[#f0f0f0]">Configuración</h2>
-              <button onClick={() => setShowConfig(false)} className="p-1.5 text-[#555] hover:text-[#aaa] rounded-lg hover:bg-white/5 transition-colors">
-                <X size={16} />
+              <h2 className="text-base font-semibold text-[#f2f2f7]">Configuración</h2>
+              <button onClick={() => setShowConfig(false)} className="p-2 text-[#6b6b7a] hover:text-[#f2f2f7] rounded-xl hover:bg-white/5 transition-all">
+                <X size={15} />
               </button>
             </div>
             <Configuracion config={config} onSave={handleSave} />

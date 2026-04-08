@@ -1,18 +1,65 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --bg:       #07070a;
+  --surface:  #0f0f13;
+  --surface2: #141419;
+  --border:   rgba(255,255,255,0.06);
+  --border2:  rgba(255,255,255,0.10);
+  --accent:   #7c5ff0;
+  --accent2:  #9d7ff0;
+  --glow:     rgba(124,95,240,0.18);
+  --txt:      #f2f2f7;
+  --txt2:     #6b6b7a;
+  --txt3:     #38383f;
+  --green:    #30d158;
+  --red:      #ff453a;
+  --yellow:   #ffa800;
+}
+
+* { box-sizing: border-box; }
+
 body {
-  background-color: #080808;
-  color: #f0f0f0;
-  font-family: system-ui, sans-serif;
+  background-color: var(--bg);
+  color: var(--txt);
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* iOS safe areas para PWA standalone */
-.bottom-nav-safe {
-  padding-bottom: max(12px, env(safe-area-inset-bottom));
+/* iOS safe areas */
+.bottom-nav-safe { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+.safe-top        { padding-top: env(safe-area-inset-top); }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
+
+/* Glass card */
+.glass {
+  background: rgba(15,15,19,0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
 }
 
-.safe-top {
-  padding-top: env(safe-area-inset-top);
+/* Gradient accent */
+.accent-gradient {
+  background: linear-gradient(135deg, #7c5ff0 0%, #a78bfa 100%);
 }
+
+/* Glow ring on focus */
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--accent2) !important;
+  box-shadow: 0 0 0 3px rgba(124,95,240,0.15);
+}
+
+/* Number input arrows hidden */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }

@@ -20,22 +20,38 @@ export default function BottomNav({ activa, onChange }: Props) {
   ]
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0d0d0d] border-t border-white/[0.06] flex items-stretch bottom-nav-safe">
-      {ITEMS.map(({ key, label, Icon }) => {
-        const active = activa === key
-        return (
-          <button
-            key={key}
-            onClick={() => onChange(key)}
-            className={`flex-1 flex flex-col items-center justify-center gap-1 py-3 transition-colors ${
-              active ? 'text-[#9d7ff0]' : 'text-[#444]'
-            }`}
-          >
-            <Icon size={20} strokeWidth={active ? 2 : 1.5} />
-            <span className="text-[10px] font-medium leading-none">{label}</span>
-          </button>
-        )
-      })}
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bottom-nav-safe">
+      {/* Blur bg */}
+      <div className="absolute inset-0 bg-[#07070a]/90 backdrop-blur-xl border-t border-white/[0.05]" />
+
+      <div className="relative flex items-stretch px-1">
+        {ITEMS.map(({ key, label, Icon }) => {
+          const active = activa === key
+          return (
+            <button
+              key={key}
+              onClick={() => onChange(key)}
+              className="flex-1 flex flex-col items-center justify-center gap-1 py-3 transition-all relative"
+            >
+              {active && (
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 accent-gradient rounded-b-full" />
+              )}
+              <div className={`flex items-center justify-center w-8 h-8 rounded-xl transition-all ${
+                active ? 'bg-[#7c5ff018]' : ''
+              }`}>
+                <Icon
+                  size={18}
+                  strokeWidth={active ? 2.5 : 1.5}
+                  className={`transition-colors ${active ? 'text-[#a78bfa]' : 'text-[#38383f]'}`}
+                />
+              </div>
+              <span className={`text-[9px] font-semibold leading-none transition-colors ${active ? 'text-[#a78bfa]' : 'text-[#38383f]'}`}>
+                {label}
+              </span>
+            </button>
+          )
+        })}
+      </div>
     </nav>
   )
 }
