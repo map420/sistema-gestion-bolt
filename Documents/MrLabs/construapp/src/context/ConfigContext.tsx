@@ -1,6 +1,6 @@
 // src/context/ConfigContext.tsx
-import { createContext, useContext, useState, useCallback } from 'react'
-import type { Config, Moneda } from '../types'
+import { createContext, useContext, useState } from 'react'
+import type { Config } from '../types'
 import { loadConfig, saveConfig } from '../storage'
 
 interface ConfigContextValue {
@@ -14,15 +14,22 @@ const ConfigContext = createContext<ConfigContextValue | null>(null)
 export function ConfigProvider({ children }: { children: React.ReactNode }) {
   const [config, setConfig] = useState<Config>(() => loadConfig())
 
-  const updateConfig = useCallback((next: Config) => {
+  function updateConfig(next: Config) {
     saveConfig(next)
-    setConfig(next)
-  }, [])
+    setConfig({ ...next }) // spread fuerza nueva referencia → re-render garantizado
+  }
 
-  const fmt = useCallback(
-    (monto: number) => formatConMoneda(monto, config.moneda),
-    [config.moneda]
-  )
+  // fmt se recalcula en cada render con el config actual — sin useCallback ni closure stale
+  function fmt(monto: number): string {
+    const moneda = config.moneda
+    if (!moneda) return `$ ${monto.toFixed(2)}`
+    const locale = LOCALE_MAP[moneda.codigo] ?? 'es'
+    const formatted = monto.toLocaleString(locale, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })
+    return `${moneda.simbolo} ${formatted}`
+  }
 
   return (
     <ConfigContext.Provider value={{ config, updateConfig, fmt }}>
@@ -37,31 +44,17 @@ export function useConfig(): ConfigContextValue {
   return ctx
 }
 
-// ── Formateo con moneda del contexto ─────────────────────────────────────────
-
-function formatConMoneda(monto: number, moneda: Moneda): string {
-  const locale = monedaLocale(moneda.codigo)
-  const formatted = monto.toLocaleString(locale, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })
-  return `${moneda.simbolo} ${formatted}`
-}
-
-function monedaLocale(codigo: string): string {
-  const map: Record<string, string> = {
-    USD: 'en-US',
-    EUR: 'es-ES',
-    BRL: 'pt-BR',
-    PEN: 'es-PE',
-    MXN: 'es-MX',
-    COP: 'es-CO',
-    CLP: 'es-CL',
-    ARS: 'es-AR',
-    GTQ: 'es-GT',
-    BOB: 'es-BO',
-    PYG: 'es-PY',
-    UYU: 'es-UY',
-  }
-  return map[codigo] ?? 'es'
+const LOCALE_MAP: Record<string, string> = {
+  USD: 'en-US',
+  EUR: 'es-ES',
+  BRL: 'pt-BR',
+  PEN: 'es-PE',
+  MXN: 'es-MX',
+  COP: 'es-CO',
+  CLP: 'es-CL',
+  ARS: 'es-AR',
+  GTQ: 'es-GT',
+  BOB: 'es-BO',
+  PYG: 'es-PY',
+  UYU: 'es-UY',
 }
