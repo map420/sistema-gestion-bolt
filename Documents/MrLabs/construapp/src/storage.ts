@@ -30,7 +30,12 @@ export function updateData(updater: (data: AppData) => AppData): AppData {
 }
 
 const CONFIG_KEY = 'construapp_config'
-const defaultConfig: Config = { nombreEmpresa: '', logoDataUrl: '' }
+const defaultConfig: Config = {
+  nombreEmpresa: '',
+  logoDataUrl: '',
+  idioma: 'es',
+  moneda: { codigo: 'PEN', simbolo: 'S/', nombre: 'Sol peruano' },
+}
 
 export function loadConfig(): Config {
   try {

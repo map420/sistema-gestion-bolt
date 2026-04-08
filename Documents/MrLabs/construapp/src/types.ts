@@ -35,7 +35,17 @@ export interface AppData {
   pagos: Pago[]
 }
 
+export type Idioma = 'es' | 'en' | 'pt'
+
+export interface Moneda {
+  codigo: string   // USD, PEN, MXN…
+  simbolo: string  // $, S/, $…
+  nombre: string
+}
+
 export interface Config {
   nombreEmpresa: string
   logoDataUrl: string
+  idioma: Idioma
+  moneda: Moneda
 }
