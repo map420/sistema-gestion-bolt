@@ -36,9 +36,9 @@ export default function Paywall({ userId }: Props) {
       <div className="w-full max-w-md">
         <div className="bg-[#111] border border-white/10 rounded-3xl p-8 flex flex-col items-center gap-6 text-center">
 
-          {/* Icon */}
-          <div className="w-16 h-16 rounded-2xl bg-[#9d7ff020] border border-[#9d7ff030] flex items-center justify-center">
-            <Lock size={32} className="text-[#9d7ff0]" />
+          {/* Red lock icon */}
+          <div className="w-16 h-16 rounded-full bg-[#f8717115] border border-[#f8717130] flex items-center justify-center">
+            <Lock size={28} className="text-[#f87171]" />
           </div>
 
           {/* Title */}
@@ -86,6 +86,10 @@ export default function Paywall({ userId }: Props) {
           >
             {loading ? t('paywall.loading') : t('paywall.cta')}
           </button>
+
+          <p className="text-xs text-[#444]">
+            {t('paywall.priceNote')}
+          </p>
 
           {/* Logout link */}
           <button

@@ -17,8 +17,8 @@ export interface TrialStatus {
 interface AuthContextValue {
   user: AuthUser | null
   trialStatus: TrialStatus | null
-  login: (nombre: string, password: string) => { ok: boolean; error?: string }
-  register: (nombre: string, password: string) => { ok: boolean; error?: string }
+  login: (email: string, password: string) => { ok: boolean; error?: string; userId?: string }
+  register: (email: string, password: string) => { ok: boolean; error?: string; userId?: string }
   logout: () => void
   confirmPayment: (sessionId: string) => Promise<void>
 }
@@ -48,21 +48,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return null
   })
 
-  const login = (nombre: string, password: string): { ok: boolean; error?: string } => {
-    const result = loginUser(nombre, password)
+  const login = (email: string, password: string): { ok: boolean; error?: string; userId?: string } => {
+    const result = loginUser(email, password)
     if (!result.ok || !result.user) return { ok: false, error: result.error }
     setCurrentUser(result.user.id)
     setSession(result.user)
     setUser(result.user)
     setTrialStatus(computeTrialStatus(result.user.id))
-    return { ok: true }
+    return { ok: true, userId: result.user.id }
   }
 
-  const register = (nombre: string, password: string): { ok: boolean; error?: string } => {
-    const result = registerUser(nombre, password)
+  const register = (email: string, password: string): { ok: boolean; error?: string; userId?: string } => {
+    const result = registerUser(email, password)
     if (!result.ok) return { ok: false, error: result.error }
     // Auto-login after register
-    return login(nombre, password)
+    return login(email, password)
   }
 
   const logout = () => {

@@ -20,19 +20,30 @@
   "auth": {
     "login": "Sign in",
     "register": "Create account",
-    "username": "Username",
+    "email": "Email",
+    "emailPh": "you@email.com",
     "password": "Password",
     "confirmPassword": "Confirm password",
     "loginBtn": "Sign in",
-    "registerBtn": "Register",
+    "trialBtn": "15-day trial",
+    "trialSub": "Free, no card needed",
+    "payBtn": "One-time payment",
+    "paySub": "Permanent access",
     "switchToRegister": "No account? Create one",
     "switchToLogin": "Already have an account? Sign in",
-    "errUserExists": "User already exists",
-    "errUserNotFound": "User not found",
+    "errUserExists": "Email already registered",
+    "errUserNotFound": "Email not found",
     "errWrongPassword": "Wrong password",
     "errPasswordMismatch": "Passwords do not match",
     "errRequired": "All fields are required",
+    "errInvalidEmail": "Enter a valid email",
     "logout": "Sign out"
+  },
+  "trial": {
+    "active": "Trial active · {{count}} days left",
+    "warning": "Your trial expires in {{count}} days",
+    "buyNow": "Buy now →",
+    "activate": "Activate permanent access →"
   },
   "projects": {
     "title": "Projects",
@@ -176,8 +187,8 @@
     "saved": "Saved!"
   },
   "paywall": {
-    "title": "Your free trial has ended",
-    "subtitle": "Activate lifetime access with a one-time payment",
+    "title": "Your trial period has ended",
+    "subtitle": "Your data is saved. Activate your account to continue.",
     "price": "$99 USD",
     "priceNote": "One-time payment · No subscriptions · Access forever",
     "feature1": "Unlimited projects and workers",

@@ -20,19 +20,30 @@
   "auth": {
     "login": "Iniciar sesión",
     "register": "Crear cuenta",
-    "username": "Usuario",
+    "email": "Email",
+    "emailPh": "tu@email.com",
     "password": "Contraseña",
     "confirmPassword": "Confirmar contraseña",
     "loginBtn": "Entrar",
-    "registerBtn": "Registrarse",
+    "trialBtn": "Prueba 15 días",
+    "trialSub": "Gratis, sin tarjeta",
+    "payBtn": "Pago único",
+    "paySub": "Acceso permanente",
     "switchToRegister": "¿No tienes cuenta? Crear cuenta",
     "switchToLogin": "¿Ya tienes cuenta? Iniciar sesión",
-    "errUserExists": "El usuario ya existe",
-    "errUserNotFound": "Usuario no encontrado",
+    "errUserExists": "El email ya está registrado",
+    "errUserNotFound": "Email no encontrado",
     "errWrongPassword": "Contraseña incorrecta",
     "errPasswordMismatch": "Las contraseñas no coinciden",
     "errRequired": "Todos los campos son obligatorios",
+    "errInvalidEmail": "Ingresa un email válido",
     "logout": "Cerrar sesión"
+  },
+  "trial": {
+    "active": "Trial activo · {{count}} días restantes",
+    "warning": "Tu trial vence en {{count}} días",
+    "buyNow": "Comprar ahora →",
+    "activate": "Activar acceso permanente →"
   },
   "projects": {
     "title": "Proyectos",
@@ -176,8 +187,8 @@
     "saved": "¡Guardado!"
   },
   "paywall": {
-    "title": "Tu prueba gratuita ha terminado",
-    "subtitle": "Activa tu acceso vitalicio con un único pago",
+    "title": "Tu periodo de prueba terminó",
+    "subtitle": "Tus datos están guardados. Activa tu cuenta para continuar.",
     "price": "$99 USD",
     "priceNote": "Pago único · Sin suscripciones · Acceso para siempre",
     "feature1": "Proyectos y trabajadores ilimitados",

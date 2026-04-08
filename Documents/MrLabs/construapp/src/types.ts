@@ -47,7 +47,8 @@ export interface AppData {
 
 export interface Usuario {
   id: string
-  nombre: string
+  nombre: string       // display name (email prefix)
+  email: string        // login identifier
   passwordHash: string
   creadoEn: string
   paidAt?: string

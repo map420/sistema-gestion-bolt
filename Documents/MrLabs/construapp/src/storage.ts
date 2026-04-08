@@ -110,17 +110,23 @@ export function setSession(user: { id: string; nombre: string } | null): void {
   }
 }
 
-export function registerUser(nombre: string, password: string): { ok: boolean; error?: string } {
-  const nombre_trim = nombre.trim()
-  if (!nombre_trim || !password) return { ok: false, error: 'errRequired' }
+function isValidEmail(email: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+}
+
+export function registerUser(email: string, password: string): { ok: boolean; error?: string } {
+  const email_trim = email.trim().toLowerCase()
+  if (!email_trim || !password) return { ok: false, error: 'errRequired' }
+  if (!isValidEmail(email_trim)) return { ok: false, error: 'errInvalidEmail' }
 
   const users = getUsers()
-  const exists = users.some(u => u.nombre.toLowerCase() === nombre_trim.toLowerCase())
+  const exists = users.some(u => (u.email ?? u.nombre).toLowerCase() === email_trim)
   if (exists) return { ok: false, error: 'errUserExists' }
 
   const newUser: Usuario = {
     id: crypto.randomUUID(),
-    nombre: nombre_trim,
+    nombre: email_trim.split('@')[0],
+    email: email_trim,
     passwordHash: hashPassword(password),
     creadoEn: new Date().toISOString(),
   }
@@ -142,12 +148,13 @@ export function registerUser(nombre: string, password: string): { ok: boolean; e
   return { ok: true }
 }
 
-export function loginUser(nombre: string, password: string): { ok: boolean; user?: { id: string; nombre: string }; error?: string } {
-  const nombre_trim = nombre.trim()
-  if (!nombre_trim || !password) return { ok: false, error: 'errRequired' }
+export function loginUser(email: string, password: string): { ok: boolean; user?: { id: string; nombre: string }; error?: string } {
+  const email_trim = email.trim().toLowerCase()
+  if (!email_trim || !password) return { ok: false, error: 'errRequired' }
 
   const users = getUsers()
-  const user = users.find(u => u.nombre.toLowerCase() === nombre_trim.toLowerCase())
+  // Support both email-based (new) and nombre-based (legacy) accounts
+  const user = users.find(u => (u.email ?? u.nombre).toLowerCase() === email_trim)
   if (!user) return { ok: false, error: 'errUserNotFound' }
 
   if (user.passwordHash !== hashPassword(password)) return { ok: false, error: 'errWrongPassword' }

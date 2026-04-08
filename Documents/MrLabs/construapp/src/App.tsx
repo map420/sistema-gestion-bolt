@@ -11,6 +11,8 @@ import Proyectos from './components/proyectos/Proyectos'
 import Login from './components/auth/Login'
 import Paywall from './components/paywall/Paywall'
 import PaymentSuccess from './components/paywall/PaymentSuccess'
+import PaymentCancelled from './components/paywall/PaymentCancelled'
+import TrialBanner from './components/TrialBanner'
 import { ConfigProvider, useConfig } from './context/ConfigContext'
 import { AuthProvider, useAuth } from './context/AuthContext'
 
@@ -28,6 +30,9 @@ function AppShell({ trialDaysRemaining }: AppShellProps) {
 
       <main className="flex-1 overflow-y-auto safe-top">
         <div className="max-w-3xl mx-auto px-4 py-6 md:px-8 md:py-10 pb-28 md:pb-10">
+          {trialDaysRemaining !== null && (
+            <TrialBanner daysRemaining={trialDaysRemaining} />
+          )}
           {seccion === 'trabajadores'  && <Trabajadores />}
           {seccion === 'registro'      && <RegistroDiario />}
           {seccion === 'proyectos'     && <Proyectos />}
@@ -45,7 +50,7 @@ function AppShell({ trialDaysRemaining }: AppShellProps) {
 function AppContent() {
   const { user, trialStatus, confirmPayment } = useAuth()
 
-  // Handle payment success redirect from Stripe
+  // Handle payment redirect from Stripe
   const params = new URLSearchParams(window.location.search)
   const paymentStatus = params.get('payment')
   const sessionId = params.get('session_id')
@@ -54,6 +59,10 @@ function AppContent() {
 
   if (paymentStatus === 'success' && sessionId) {
     return <PaymentSuccess sessionId={sessionId} onConfirm={confirmPayment} />
+  }
+
+  if (paymentStatus === 'cancelled') {
+    return <PaymentCancelled />
   }
 
   if (trialStatus?.expired) return <Paywall userId={user.id} />
