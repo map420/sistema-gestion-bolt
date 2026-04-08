@@ -1,5 +1,6 @@
 // src/components/registro/TrabajadorRow.tsx
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { Trabajador, Registro } from '../../types'
 import { useConfig } from '../../context/ConfigContext'
 
@@ -11,6 +12,7 @@ interface Props {
 
 export default function TrabajadorRow({ trabajador, registroExistente, onChange }: Props) {
   const { fmt } = useConfig()
+  const { t } = useTranslation()
   const [activo, setActivo] = useState(!!registroExistente)
   const [cantidad, setCantidad] = useState(registroExistente?.cantidad?.toString() ?? '')
   const [actividad, setActividad] = useState(registroExistente?.actividad ?? '')
@@ -46,7 +48,7 @@ export default function TrabajadorRow({ trabajador, registroExistente, onChange 
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-[#f0f0f0] truncate">{trabajador.nombre}</p>
-          <p className="text-xs text-[#555]">{trabajador.oficio} · {fmt(trabajador.tarifa)}/{trabajador.tipoPago === 'dia' ? 'día' : 'hora'}</p>
+          <p className="text-xs text-[#555]">{trabajador.oficio} · {fmt(trabajador.tarifa)}/{trabajador.tipoPago === 'dia' ? t('daily.day') : t('daily.hour')}</p>
         </div>
         <button
           onClick={() => handleToggle(!activo)}
@@ -55,24 +57,24 @@ export default function TrabajadorRow({ trabajador, registroExistente, onChange 
           <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${activo ? 'left-5' : 'left-0.5'}`} />
         </button>
         <span className={`text-xs font-medium w-16 text-right ${activo ? 'text-[#9d7ff0]' : 'text-[#555]'}`}>
-          {activo ? 'Trabajó' : 'No trabajó'}
+          {activo ? t('daily.worked') : t('daily.notWorked')}
         </span>
       </div>
 
       {activo && (
         <div className="px-4 pb-3.5 pt-3 border-t border-white/5 flex flex-col gap-2 sm:flex-row sm:gap-2">
           <div className="flex-1 flex flex-col gap-1">
-            <span className="text-xs text-[#555] uppercase tracking-wide">Actividad</span>
+            <span className="text-xs text-[#555] uppercase tracking-wide">{t('daily.activity')}</span>
             <input
               className="bg-[#0d0d0d] border border-white/10 rounded-lg px-3 py-2 text-sm text-[#f0f0f0] focus:outline-none focus:border-[#9d7ff0]"
-              placeholder="Ej: Colada de columnas — Bloque B"
+              placeholder={t('daily.actPh')}
               value={actividad}
               onChange={e => { setActividad(e.target.value); handleChange(cantidad, e.target.value) }}
             />
           </div>
           <div className="flex gap-2 sm:contents">
             <div className="flex-1 sm:w-20 sm:flex-none flex flex-col gap-1">
-              <span className="text-xs text-[#555] uppercase tracking-wide">{trabajador.tipoPago === 'dia' ? 'Días' : 'Horas'}</span>
+              <span className="text-xs text-[#555] uppercase tracking-wide">{trabajador.tipoPago === 'dia' ? t('daily.days') : t('daily.hours')}</span>
               <input
                 type="number"
                 min="0"
@@ -83,7 +85,7 @@ export default function TrabajadorRow({ trabajador, registroExistente, onChange 
               />
             </div>
             <div className="flex-1 sm:w-24 sm:flex-none flex flex-col gap-1">
-              <span className="text-xs text-[#555] uppercase tracking-wide">Total</span>
+              <span className="text-xs text-[#555] uppercase tracking-wide">{t('daily.totalLabel')}</span>
               <div className="bg-[#9d7ff015] border border-[#9d7ff030] rounded-lg px-3 py-2 text-sm font-bold text-[#9d7ff0] text-center">
                 {fmt(monto)}
               </div>

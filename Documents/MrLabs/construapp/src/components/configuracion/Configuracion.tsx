@@ -1,5 +1,6 @@
 // src/components/configuracion/Configuracion.tsx
 import { useState, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Building2, Upload, X, Check, Globe, DollarSign } from 'lucide-react'
 import type { Config, Idioma, Moneda } from '../../types'
 import { saveConfig } from '../../storage'
@@ -26,6 +27,7 @@ const MONEDAS: Moneda[] = [
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function Configuracion({ config }: Props) {
+  const { t } = useTranslation()
   const [nombre, setNombre]     = useState(config.nombreEmpresa)
   const [logoDataUrl, setLogo]  = useState(config.logoDataUrl)
   const [idioma, setIdioma]     = useState<Idioma>(config.idioma ?? 'es')
@@ -49,10 +51,8 @@ export default function Configuracion({ config }: Props) {
       idioma,
       moneda,
     }
-    // Guardar directo en localStorage — sin depender del contexto
     saveConfig(next)
     setGuardado(true)
-    // Recargar la página para que todos los componentes lean el nuevo config
     setTimeout(() => window.location.reload(), 800)
   }
 
@@ -62,15 +62,15 @@ export default function Configuracion({ config }: Props) {
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h1 className="text-xl font-bold text-[#f0f0f0] tracking-tight">Configuración</h1>
-        <p className="text-sm text-[#444] mt-1">Datos de la empresa que aparecen en los documentos PDF.</p>
+        <h1 className="text-xl font-bold text-[#f0f0f0] tracking-tight">{t('settings.title')}</h1>
+        <p className="text-sm text-[#444] mt-1">{t('settings.subtitle')}</p>
       </div>
 
       <div className="bg-[#111] border border-white/5 rounded-2xl p-6 flex flex-col gap-6 max-w-lg">
 
         {/* Logo */}
         <div className="flex flex-col gap-3">
-          <label className="text-xs font-semibold text-[#666] uppercase tracking-widest">Logo de la empresa</label>
+          <label className="text-xs font-semibold text-[#666] uppercase tracking-widest">{t('settings.logo')}</label>
           <div className="flex items-center gap-4">
             <div className="w-16 h-16 rounded-2xl bg-[#1a1a1a] border border-white/10 flex items-center justify-center overflow-hidden shrink-0">
               {logoDataUrl
@@ -83,32 +83,32 @@ export default function Configuracion({ config }: Props) {
                 onClick={() => inputRef.current?.click()}
                 className="flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] border border-white/10 rounded-lg text-sm text-[#aaa] hover:text-white hover:border-white/20 transition-colors"
               >
-                <Upload size={14} /> Subir imagen
+                <Upload size={14} /> {t('settings.upload')}
               </button>
               {logoDataUrl && (
                 <button
                   onClick={() => setLogo('')}
                   className="flex items-center gap-1.5 text-xs text-[#555] hover:text-[#f87171] transition-colors"
                 >
-                  <X size={12} /> Quitar logo
+                  <X size={12} /> {t('settings.remove')}
                 </button>
               )}
             </div>
           </div>
           <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleLogo} />
-          <p className="text-xs text-[#333]">PNG, JPG o SVG. Se mostrará en la barra lateral y en los documentos PDF.</p>
+          <p className="text-xs text-[#333]">{t('settings.logoHint')}</p>
         </div>
 
         <div className="border-t border-white/5" />
 
         {/* Nombre */}
         <div className="flex flex-col gap-2">
-          <label className="text-xs font-semibold text-[#666] uppercase tracking-widest">Nombre de la empresa</label>
+          <label className="text-xs font-semibold text-[#666] uppercase tracking-widest">{t('settings.name')}</label>
           <input
             type="text"
             value={nombre}
             onChange={e => setNombre(e.target.value)}
-            placeholder="Ej. Constructora López & Hnos."
+            placeholder={t('settings.namePh')}
             className="bg-[#0d0d0d] border border-white/10 rounded-xl px-4 py-3 text-sm text-[#f0f0f0] placeholder-[#333] focus:outline-none focus:border-[#9d7ff0] transition-colors"
           />
         </div>
@@ -118,7 +118,7 @@ export default function Configuracion({ config }: Props) {
         {/* Idioma */}
         <div className="flex flex-col gap-2">
           <label className="text-xs font-semibold text-[#666] uppercase tracking-widest flex items-center gap-1.5">
-            <Globe size={12} className="text-[#555]" /> Idioma
+            <Globe size={12} className="text-[#555]" /> {t('settings.language')}
           </label>
           <div className="relative">
             <select
@@ -141,7 +141,7 @@ export default function Configuracion({ config }: Props) {
         {/* Moneda */}
         <div className="flex flex-col gap-2">
           <label className="text-xs font-semibold text-[#666] uppercase tracking-widest flex items-center gap-1.5">
-            <DollarSign size={12} className="text-[#555]" /> Moneda
+            <DollarSign size={12} className="text-[#555]" /> {t('settings.currency')}
           </label>
           <div className="relative">
             <select
@@ -159,7 +159,7 @@ export default function Configuracion({ config }: Props) {
           </div>
           {/* Preview */}
           <div className="flex items-center gap-2 px-3 py-2 bg-[#0d0d0d] border border-white/5 rounded-lg">
-            <span className="text-xs text-[#555]">Ejemplo:</span>
+            <span className="text-xs text-[#555]">{t('settings.example')}</span>
             <span className="text-sm font-mono text-[#9d7ff0]">
               {monedaActual.simbolo} 1,250.00
             </span>
@@ -179,8 +179,8 @@ export default function Configuracion({ config }: Props) {
           }`}
         >
           {guardado
-            ? <><Check size={15} /> Guardado — recargando...</>
-            : 'Guardar configuración'}
+            ? <><Check size={15} /> {t('settings.saved')}</>
+            : t('settings.save')}
         </button>
       </div>
     </div>

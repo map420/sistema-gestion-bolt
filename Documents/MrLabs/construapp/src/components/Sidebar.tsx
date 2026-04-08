@@ -1,4 +1,5 @@
 // src/components/Sidebar.tsx
+import { useTranslation } from 'react-i18next'
 import { Users, ClipboardList, DollarSign, BarChart2, Settings, Building2, type LucideIcon } from 'lucide-react'
 import type { Config } from '../types'
 
@@ -10,14 +11,16 @@ interface Props {
   config: Config
 }
 
-const NAV_ITEMS: { key: Seccion; label: string; Icon: LucideIcon }[] = [
-  { key: 'trabajadores', label: 'Trabajadores',    Icon: Users },
-  { key: 'registro',     label: 'Registro diario', Icon: ClipboardList },
-  { key: 'pagos',        label: 'Pagos',           Icon: DollarSign },
-  { key: 'reportes',     label: 'Reportes',        Icon: BarChart2 },
-]
-
 export default function Sidebar({ activa, onChange, config }: Props) {
+  const { t } = useTranslation()
+
+  const NAV_ITEMS: { key: Seccion; label: string; Icon: LucideIcon }[] = [
+    { key: 'trabajadores', label: t('nav.workers'),   Icon: Users },
+    { key: 'registro',     label: t('nav.daily'),     Icon: ClipboardList },
+    { key: 'pagos',        label: t('nav.payments'),  Icon: DollarSign },
+    { key: 'reportes',     label: t('nav.reports'),   Icon: BarChart2 },
+  ]
+
   const initials = config.nombreEmpresa
     ? config.nombreEmpresa.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
     : 'CE'
@@ -38,9 +41,9 @@ export default function Sidebar({ activa, onChange, config }: Props) {
           </div>
           <div className="min-w-0">
             <p className="text-sm font-semibold text-[#e0e0e0] truncate leading-tight">
-              {config.nombreEmpresa || 'Mi Empresa'}
+              {config.nombreEmpresa || t('nav.myCompany')}
             </p>
-            <p className="text-[10px] text-[#3a3a3a] mt-0.5 leading-none">Panel de gestión</p>
+            <p className="text-[10px] text-[#3a3a3a] mt-0.5 leading-none">{t('nav.panel')}</p>
           </div>
         </div>
       </div>
@@ -83,7 +86,7 @@ export default function Sidebar({ activa, onChange, config }: Props) {
             size={15}
             className={`shrink-0 transition-colors ${activa === 'configuracion' ? 'text-[#9d7ff0]' : 'text-[#333] group-hover:text-[#666]'}`}
           />
-          Configuración
+          {t('nav.settings')}
         </button>
       </div>
     </aside>

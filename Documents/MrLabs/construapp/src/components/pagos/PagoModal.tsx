@@ -1,5 +1,6 @@
 // src/components/pagos/PagoModal.tsx
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
 import type { Trabajador, Pago } from '../../types'
 import { uuid, hoy } from '../../utils'
@@ -15,14 +16,15 @@ interface Props {
 
 export default function PagoModal({ trabajador, saldoPendiente, periodo, onGuardar, onCerrar }: Props) {
   const { fmt } = useConfig()
+  const { t } = useTranslation()
   const [monto, setMonto] = useState(saldoPendiente.toFixed(2))
   const [notas, setNotas] = useState('')
   const [error, setError] = useState('')
 
   const handleGuardar = () => {
     const num = Number(monto)
-    if (!num || num <= 0) { setError('El monto debe ser mayor a 0'); return }
-    if (num > saldoPendiente) { setError('El monto no puede superar el saldo pendiente'); return }
+    if (!num || num <= 0) { setError(t('payModal.errAmount')); return }
+    if (num > saldoPendiente) { setError(t('payModal.errExceed')); return }
     onGuardar({
       id: uuid(),
       trabajadorId: trabajador.id,
@@ -37,28 +39,28 @@ export default function PagoModal({ trabajador, saldoPendiente, periodo, onGuard
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
       <div className="bg-[#111] border border-white/10 rounded-2xl w-full max-w-sm p-6 flex flex-col gap-4">
         <div className="flex items-center justify-between">
-          <h2 className="font-semibold text-[#f0f0f0]">Registrar pago</h2>
+          <h2 className="font-semibold text-[#f0f0f0]">{t('payModal.title')}</h2>
           <button onClick={onCerrar} className="text-[#555] hover:text-[#aaa]"><X size={18} /></button>
         </div>
-        <p className="text-sm text-[#555]">{trabajador.nombre} · Saldo pendiente: <span className="text-[#f87171] font-semibold">{fmt(saldoPendiente)}</span></p>
-        <p className="text-xs text-[#444]">Período: {periodo.desde} al {periodo.hasta}</p>
+        <p className="text-sm text-[#555]">{trabajador.nombre} · {t('payModal.pending')} <span className="text-[#f87171] font-semibold">{fmt(saldoPendiente)}</span></p>
+        <p className="text-xs text-[#444]">{t('payModal.period')} {periodo.desde} {t('payments.to')} {periodo.hasta}</p>
 
         {error && <p className="text-xs text-[#f87171] bg-[#f8717115] border border-[#f8717130] rounded-lg px-3 py-2">{error}</p>}
 
         <div className="flex flex-col gap-3">
           <label className="flex flex-col gap-1">
-            <span className="text-xs text-[#555] uppercase tracking-wide">Monto a pagar *</span>
+            <span className="text-xs text-[#555] uppercase tracking-wide">{t('payModal.amount')} *</span>
             <input type="number" min="0" className="bg-[#0d0d0d] border border-white/10 rounded-lg px-3 py-2 text-sm text-[#f0f0f0] focus:outline-none focus:border-[#9d7ff0]" value={monto} onChange={e => setMonto(e.target.value)} />
           </label>
           <label className="flex flex-col gap-1">
-            <span className="text-xs text-[#555] uppercase tracking-wide">Notas (opcional)</span>
-            <input className="bg-[#0d0d0d] border border-white/10 rounded-lg px-3 py-2 text-sm text-[#f0f0f0] focus:outline-none focus:border-[#9d7ff0]" value={notas} onChange={e => setNotas(e.target.value)} placeholder="Ej: Pago semana 1 de abril" />
+            <span className="text-xs text-[#555] uppercase tracking-wide">{t('payModal.notes')}</span>
+            <input className="bg-[#0d0d0d] border border-white/10 rounded-lg px-3 py-2 text-sm text-[#f0f0f0] focus:outline-none focus:border-[#9d7ff0]" value={notas} onChange={e => setNotas(e.target.value)} placeholder={t('payModal.notesPh')} />
           </label>
         </div>
 
         <div className="flex gap-2 pt-2">
-          <button onClick={onCerrar} className="flex-1 py-2 rounded-lg text-sm border border-white/10 text-[#666] hover:text-[#aaa]">Cancelar</button>
-          <button onClick={handleGuardar} className="flex-1 py-2 rounded-lg text-sm font-semibold bg-[#9d7ff0] text-white hover:bg-[#8b6fd4] transition-colors">Registrar pago</button>
+          <button onClick={onCerrar} className="flex-1 py-2 rounded-lg text-sm border border-white/10 text-[#666] hover:text-[#aaa]">{t('payModal.cancel')}</button>
+          <button onClick={handleGuardar} className="flex-1 py-2 rounded-lg text-sm font-semibold bg-[#9d7ff0] text-white hover:bg-[#8b6fd4] transition-colors">{t('payModal.register')}</button>
         </div>
       </div>
     </div>
