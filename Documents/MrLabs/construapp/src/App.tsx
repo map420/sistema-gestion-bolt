@@ -50,15 +50,12 @@ function AppShell({ trialDaysRemaining }: AppShellProps) {
 function AppContent() {
   const { user, trialStatus, confirmPayment } = useAuth()
 
-  // Handle payment redirect from Stripe
   const params = new URLSearchParams(window.location.search)
   const paymentStatus = params.get('payment')
   const sessionId = params.get('session_id')
 
-  if (!user) return <Login />
-
+  // Payment success — must be checked before login gate (new user may not exist yet)
   if (paymentStatus === 'success' && sessionId) {
-    // Read pending registration if user came from "Pago único" on register form
     const pendingRaw = sessionStorage.getItem('construapp_pending_pay')
     const pendingRegistration = pendingRaw
       ? JSON.parse(pendingRaw) as { email: string; password: string }
@@ -66,9 +63,18 @@ function AppContent() {
     return <PaymentSuccess sessionId={sessionId} onConfirm={confirmPayment} pendingRegistration={pendingRegistration} />
   }
 
-  if (paymentStatus === 'cancelled') {
+  // Payment cancelled during new-user registration flow
+  if (paymentStatus === 'cancelled' && sessionStorage.getItem('construapp_pending_pay')) {
+    sessionStorage.removeItem('construapp_pending_pay')
     return <PaymentCancelled />
   }
+
+  // Clear any stale payment params from URL so they don't interfere later
+  if (paymentStatus) {
+    window.history.replaceState({}, '', '/')
+  }
+
+  if (!user) return <Login />
 
   if (trialStatus?.expired) return <Paywall userId={user.id} />
 
