@@ -93,17 +93,6 @@ export default function Sidebar({ activa, onChange, config, trialDaysRemaining }
           {t('nav.settings')}
         </button>
 
-        {/* Trial badge */}
-        {trialDaysRemaining !== null && trialDaysRemaining !== undefined && (
-          <div className={`mx-3 mb-1 px-3 py-1.5 rounded-lg text-xs font-medium text-center ${
-            trialDaysRemaining <= 3
-              ? 'text-[#f87171] bg-[#f8717115]'
-              : 'text-[#eab308] bg-[#eab30815]'
-          }`}>
-            {t('paywall.trialBadge', { count: trialDaysRemaining })}
-          </div>
-        )}
-
         {/* User info + logout */}
         {user && (
           <div className="flex items-center gap-2 px-3 py-2 mt-1">
