@@ -3,7 +3,6 @@ import { useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Building2, Upload, X, Check, Globe, DollarSign } from 'lucide-react'
 import type { Config, Idioma, Moneda } from '../../types'
-import { saveConfig } from '../../storage'
 
 interface Props {
   config: Config
@@ -26,7 +25,7 @@ const MONEDAS: Moneda[] = [
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export default function Configuracion({ config }: Props) {
+export default function Configuracion({ config, onSave }: Props) {
   const { t } = useTranslation()
   const [nombre, setNombre]     = useState(config.nombreEmpresa)
   const [logoDataUrl, setLogo]  = useState(config.logoDataUrl)
@@ -51,9 +50,9 @@ export default function Configuracion({ config }: Props) {
       idioma,
       moneda,
     }
-    saveConfig(next)
+    onSave(next)  // updateConfig: saves, updates React state, calls i18n.changeLanguage
     setGuardado(true)
-    setTimeout(() => window.location.reload(), 800)
+    setTimeout(() => setGuardado(false), 2000)
   }
 
   const selectClass = "bg-[#0d0d0d] border border-white/10 rounded-xl px-4 py-3 text-sm text-[#f0f0f0] focus:outline-none focus:border-[#9d7ff0] transition-colors appearance-none cursor-pointer w-full pr-10"
