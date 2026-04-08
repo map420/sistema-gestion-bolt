@@ -1,6 +1,6 @@
 // src/components/pdf/PlanillaTemplate.tsx
 import type { Trabajador, Registro, Pago } from '../../types'
-import { calcularSaldo, formatMoneda } from '../../utils'
+import { calcularSaldo } from "../../utils"
 
 interface Props {
   id: string
@@ -9,9 +9,10 @@ interface Props {
   pagos: Pago[]
   periodo: { desde: string; hasta: string }
   nombreEmpresa?: string
+  fmt: (monto: number) => string
 }
 
-export default function PlanillaTemplate({ id, trabajadores, registros, pagos, periodo, nombreEmpresa = 'Constructora' }: Props) {
+export default function PlanillaTemplate({ id, trabajadores, registros, pagos, periodo, nombreEmpresa = 'Constructora', fmt }: Props) {
   const filas = trabajadores.map(t => {
     const regs = registros.filter(r => r.trabajadorId === t.id && r.fecha >= periodo.desde && r.fecha <= periodo.hasta)
     const totalCantidad = regs.reduce((s, r) => s + r.cantidad, 0)
@@ -46,16 +47,16 @@ export default function PlanillaTemplate({ id, trabajadores, registros, pagos, p
               <td style={{ padding: '7px 8px', border: '1px solid #eee', fontWeight: 600 }}>{t.nombre}</td>
               <td style={{ padding: '7px 8px', border: '1px solid #eee', color: '#666' }}>{t.oficio}</td>
               <td style={{ padding: '7px 8px', border: '1px solid #eee', textAlign: 'right' }}>{totalCantidad}</td>
-              <td style={{ padding: '7px 8px', border: '1px solid #eee', textAlign: 'right' }}>{formatMoneda(devengado)}</td>
-              <td style={{ padding: '7px 8px', border: '1px solid #eee', textAlign: 'right' }}>{formatMoneda(pagado)}</td>
-              <td style={{ padding: '7px 8px', border: '1px solid #eee', textAlign: 'right', fontWeight: pendiente > 0 ? 700 : 400 }}>{formatMoneda(pendiente)}</td>
+              <td style={{ padding: '7px 8px', border: '1px solid #eee', textAlign: 'right' }}>{fmt(devengado)}</td>
+              <td style={{ padding: '7px 8px', border: '1px solid #eee', textAlign: 'right' }}>{fmt(pagado)}</td>
+              <td style={{ padding: '7px 8px', border: '1px solid #eee', textAlign: 'right', fontWeight: pendiente > 0 ? 700 : 400 }}>{fmt(pendiente)}</td>
             </tr>
           ))}
           <tr style={{ background: '#f0f0f0', fontWeight: 700 }}>
             <td colSpan={3} style={{ padding: '8px', border: '1px solid #eee', textAlign: 'right' }}>TOTALES</td>
-            <td style={{ padding: '8px', border: '1px solid #eee', textAlign: 'right' }}>{formatMoneda(totalDevengado)}</td>
-            <td style={{ padding: '8px', border: '1px solid #eee', textAlign: 'right' }}>{formatMoneda(totalPagado)}</td>
-            <td style={{ padding: '8px', border: '1px solid #eee', textAlign: 'right' }}>{formatMoneda(totalPendiente)}</td>
+            <td style={{ padding: '8px', border: '1px solid #eee', textAlign: 'right' }}>{fmt(totalDevengado)}</td>
+            <td style={{ padding: '8px', border: '1px solid #eee', textAlign: 'right' }}>{fmt(totalPagado)}</td>
+            <td style={{ padding: '8px', border: '1px solid #eee', textAlign: 'right' }}>{fmt(totalPendiente)}</td>
           </tr>
         </tbody>
       </table>

@@ -1,7 +1,8 @@
 // src/components/pagos/DetalleModal.tsx
 import { X } from 'lucide-react'
 import type { Trabajador, Registro, Pago } from '../../types'
-import { formatFecha, formatMoneda, calcularSaldo } from '../../utils'
+import { formatFecha, calcularSaldo } from '../../utils'
+import { useConfig } from '../../context/ConfigContext'
 
 interface Props {
   trabajador: Trabajador
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export default function DetalleModal({ trabajador, registros, pagos, periodo, onCerrar }: Props) {
+  const { fmt } = useConfig()
   const etiquetaPeriodo = `${periodo.desde} al ${periodo.hasta}`
   const { devengado, pagado, pendiente } = calcularSaldo(trabajador.id, periodo, registros, pagos)
   return (
@@ -32,7 +34,7 @@ export default function DetalleModal({ trabajador, registros, pagos, periodo, on
               <span className="text-xs text-[#555] w-20 shrink-0 capitalize">{formatFecha(r.fecha).split(',')[0]}</span>
               <span className="flex-1 text-sm text-[#aaa] truncate">{r.actividad || '—'}</span>
               <span className="text-xs text-[#555] w-12 text-center shrink-0">{r.cantidad} {trabajador.tipoPago === 'dia' ? 'd' : 'h'}</span>
-              <span className="text-sm font-semibold text-[#f0f0f0] w-20 text-right shrink-0">{formatMoneda(r.montoCalculado)}</span>
+              <span className="text-sm font-semibold text-[#f0f0f0] w-20 text-right shrink-0">{fmt(r.montoCalculado)}</span>
             </div>
           ))}
         </div>
@@ -40,15 +42,15 @@ export default function DetalleModal({ trabajador, registros, pagos, periodo, on
           <div className="border-t border-white/5 pt-3 flex justify-between items-center gap-4">
             <div className="flex flex-col items-center gap-0.5">
               <span className="text-[10px] text-[#555] uppercase tracking-wide">Devengado</span>
-              <span className="text-sm font-bold text-[#f0f0f0]">{formatMoneda(devengado)}</span>
+              <span className="text-sm font-bold text-[#f0f0f0]">{fmt(devengado)}</span>
             </div>
             <div className="flex flex-col items-center gap-0.5">
               <span className="text-[10px] text-[#555] uppercase tracking-wide">Pagado</span>
-              <span className="text-sm font-bold text-[#34d399]">{formatMoneda(pagado)}</span>
+              <span className="text-sm font-bold text-[#34d399]">{fmt(pagado)}</span>
             </div>
             <div className="flex flex-col items-center gap-0.5">
               <span className="text-[10px] text-[#555] uppercase tracking-wide">Pendiente</span>
-              <span className={`text-sm font-bold ${pendiente > 0 ? 'text-[#f87171]' : 'text-[#34d399]'}`}>{formatMoneda(pendiente)}</span>
+              <span className={`text-sm font-bold ${pendiente > 0 ? 'text-[#f87171]' : 'text-[#34d399]'}`}>{fmt(pendiente)}</span>
             </div>
           </div>
         )}

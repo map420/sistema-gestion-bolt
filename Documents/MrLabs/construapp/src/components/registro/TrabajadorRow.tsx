@@ -1,7 +1,7 @@
 // src/components/registro/TrabajadorRow.tsx
 import { useState } from 'react'
 import type { Trabajador, Registro } from '../../types'
-import { formatMoneda } from '../../utils'
+import { useConfig } from '../../context/ConfigContext'
 
 interface Props {
   trabajador: Trabajador
@@ -10,6 +10,7 @@ interface Props {
 }
 
 export default function TrabajadorRow({ trabajador, registroExistente, onChange }: Props) {
+  const { fmt } = useConfig()
   const [activo, setActivo] = useState(!!registroExistente)
   const [cantidad, setCantidad] = useState(registroExistente?.cantidad?.toString() ?? '')
   const [actividad, setActividad] = useState(registroExistente?.actividad ?? '')
@@ -45,7 +46,7 @@ export default function TrabajadorRow({ trabajador, registroExistente, onChange 
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-[#f0f0f0] truncate">{trabajador.nombre}</p>
-          <p className="text-xs text-[#555]">{trabajador.oficio} · {formatMoneda(trabajador.tarifa)}/{trabajador.tipoPago === 'dia' ? 'día' : 'hora'}</p>
+          <p className="text-xs text-[#555]">{trabajador.oficio} · {fmt(trabajador.tarifa)}/{trabajador.tipoPago === 'dia' ? 'día' : 'hora'}</p>
         </div>
         <button
           onClick={() => handleToggle(!activo)}
@@ -84,7 +85,7 @@ export default function TrabajadorRow({ trabajador, registroExistente, onChange 
             <div className="flex-1 sm:w-24 sm:flex-none flex flex-col gap-1">
               <span className="text-xs text-[#555] uppercase tracking-wide">Total</span>
               <div className="bg-[#9d7ff015] border border-[#9d7ff030] rounded-lg px-3 py-2 text-sm font-bold text-[#9d7ff0] text-center">
-                {formatMoneda(monto)}
+                {fmt(monto)}
               </div>
             </div>
           </div>

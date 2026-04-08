@@ -3,7 +3,8 @@ import { useState, useEffect } from 'react'
 import { Eye, DollarSign, FileText } from 'lucide-react'
 import type { Trabajador, Pago } from '../../types'
 import { loadData, updateData } from '../../storage'
-import { calcularSaldo, formatMoneda, semanaActual, quincenaActual, siguienteFolio } from '../../utils'
+import { calcularSaldo, semanaActual, quincenaActual, siguienteFolio } from '../../utils'
+import { useConfig } from '../../context/ConfigContext'
 import { usePDF } from '../../hooks/usePDF'
 import PagoModal from './PagoModal'
 import DetalleModal from './DetalleModal'
@@ -16,6 +17,7 @@ interface Props {
 }
 
 export default function Pagos({ nombreEmpresa }: Props) {
+  const { fmt } = useConfig()
   const [data, setData] = useState(() => loadData())
   const [modo, setModo] = useState<ModoPeriodo>('semana')
   const [periodoCustom, setPeriodoCustom] = useState({ desde: '', hasta: '' })
@@ -93,14 +95,14 @@ export default function Pagos({ nombreEmpresa }: Props) {
                     <p className="text-xs text-[#555]">{t.oficio}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-base font-bold text-[#f0f0f0] tracking-tight">{formatMoneda(devengado)}</p>
+                    <p className="text-base font-bold text-[#f0f0f0] tracking-tight">{fmt(devengado)}</p>
                     <div className="flex gap-2 mt-0.5 flex-wrap">
-                      <span className="text-[10px] text-[#555]">Dev {formatMoneda(devengado)}</span>
-                      <span className="text-[10px] text-[#34d399]">Pag {formatMoneda(pagado)}</span>
-                      <span className={`text-[10px] ${pendiente > 0 ? 'text-[#f87171]' : 'text-[#34d399]'}`}>Sal {formatMoneda(pendiente)}</span>
+                      <span className="text-[10px] text-[#555]">Dev {fmt(devengado)}</span>
+                      <span className="text-[10px] text-[#34d399]">Pag {fmt(pagado)}</span>
+                      <span className={`text-[10px] ${pendiente > 0 ? 'text-[#f87171]' : 'text-[#34d399]'}`}>Sal {fmt(pendiente)}</span>
                     </div>
                     <span className={`text-xs font-medium ${sinDeuda ? 'text-[#34d399]' : 'text-[#f87171]'}`}>
-                      {sinDeuda ? 'Sin deuda' : `Pendiente ${formatMoneda(pendiente)}`}
+                      {sinDeuda ? 'Sin deuda' : `Pendiente ${fmt(pendiente)}`}
                     </span>
                   </div>
                 </div>
@@ -153,6 +155,7 @@ export default function Pagos({ nombreEmpresa }: Props) {
             )}
             pago={comprobanteTarget.pago}
             nombreEmpresa={nombreEmpresa}
+            fmt={fmt}
           />
         </div>
       )}

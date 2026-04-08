@@ -2,7 +2,8 @@
 import { useState } from 'react'
 import { X } from 'lucide-react'
 import type { Trabajador, Pago } from '../../types'
-import { uuid, hoy, formatMoneda } from '../../utils'
+import { uuid, hoy } from '../../utils'
+import { useConfig } from '../../context/ConfigContext'
 
 interface Props {
   trabajador: Trabajador
@@ -13,6 +14,7 @@ interface Props {
 }
 
 export default function PagoModal({ trabajador, saldoPendiente, periodo, onGuardar, onCerrar }: Props) {
+  const { fmt } = useConfig()
   const [monto, setMonto] = useState(saldoPendiente.toFixed(2))
   const [notas, setNotas] = useState('')
   const [error, setError] = useState('')
@@ -38,7 +40,7 @@ export default function PagoModal({ trabajador, saldoPendiente, periodo, onGuard
           <h2 className="font-semibold text-[#f0f0f0]">Registrar pago</h2>
           <button onClick={onCerrar} className="text-[#555] hover:text-[#aaa]"><X size={18} /></button>
         </div>
-        <p className="text-sm text-[#555]">{trabajador.nombre} · Saldo pendiente: <span className="text-[#f87171] font-semibold">{formatMoneda(saldoPendiente)}</span></p>
+        <p className="text-sm text-[#555]">{trabajador.nombre} · Saldo pendiente: <span className="text-[#f87171] font-semibold">{fmt(saldoPendiente)}</span></p>
         <p className="text-xs text-[#444]">Período: {periodo.desde} al {periodo.hasta}</p>
 
         {error && <p className="text-xs text-[#f87171] bg-[#f8717115] border border-[#f8717130] rounded-lg px-3 py-2">{error}</p>}

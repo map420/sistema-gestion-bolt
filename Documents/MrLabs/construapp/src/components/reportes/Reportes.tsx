@@ -2,7 +2,8 @@
 import { useState } from 'react'
 import { Download } from 'lucide-react'
 import { loadData } from '../../storage'
-import { calcularSaldo, formatMoneda, semanaActual, quincenaActual } from '../../utils'
+import { calcularSaldo, semanaActual, quincenaActual } from '../../utils'
+import { useConfig } from '../../context/ConfigContext'
 import { usePDF } from '../../hooks/usePDF'
 import PlanillaTemplate from '../pdf/PlanillaTemplate'
 
@@ -13,6 +14,7 @@ interface Props {
 }
 
 export default function Reportes({ nombreEmpresa }: Props) {
+  const { fmt } = useConfig()
   const [data] = useState(() => loadData())
   const [modo, setModo] = useState<ModoPeriodo>('semana')
   const [periodoCustom, setPeriodoCustom] = useState({ desde: '', hasta: '' })
@@ -83,16 +85,16 @@ export default function Reportes({ nombreEmpresa }: Props) {
                   <td className="py-3 px-3 font-medium text-[#f0f0f0]">{t.nombre}</td>
                   <td className="py-3 px-3 text-[#555]">{t.oficio}</td>
                   <td className="py-3 px-3 text-right text-[#aaa]">{totalCantidad}</td>
-                  <td className="py-3 px-3 text-right text-[#f0f0f0]">{formatMoneda(devengado)}</td>
-                  <td className="py-3 px-3 text-right text-[#34d399]">{formatMoneda(pagado)}</td>
-                  <td className={`py-3 px-3 text-right font-semibold ${pendiente > 0 ? 'text-[#f87171]' : 'text-[#34d399]'}`}>{formatMoneda(pendiente)}</td>
+                  <td className="py-3 px-3 text-right text-[#f0f0f0]">{fmt(devengado)}</td>
+                  <td className="py-3 px-3 text-right text-[#34d399]">{fmt(pagado)}</td>
+                  <td className={`py-3 px-3 text-right font-semibold ${pendiente > 0 ? 'text-[#f87171]' : 'text-[#34d399]'}`}>{fmt(pendiente)}</td>
                 </tr>
               ))}
               <tr className="border-t border-white/20 bg-white/[0.03]">
                 <td colSpan={3} className="py-3 px-3 text-xs font-bold text-[#555] uppercase tracking-wide text-right">Totales</td>
-                <td className="py-3 px-3 text-right font-bold text-[#f0f0f0]">{formatMoneda(totalDevengado)}</td>
-                <td className="py-3 px-3 text-right font-bold text-[#34d399]">{formatMoneda(totalPagado)}</td>
-                <td className="py-3 px-3 text-right font-bold text-[#f87171]">{formatMoneda(totalPendiente)}</td>
+                <td className="py-3 px-3 text-right font-bold text-[#f0f0f0]">{fmt(totalDevengado)}</td>
+                <td className="py-3 px-3 text-right font-bold text-[#34d399]">{fmt(totalPagado)}</td>
+                <td className="py-3 px-3 text-right font-bold text-[#f87171]">{fmt(totalPendiente)}</td>
               </tr>
             </tbody>
           </table>
@@ -108,6 +110,7 @@ export default function Reportes({ nombreEmpresa }: Props) {
           pagos={data.pagos}
           periodo={periodo}
           nombreEmpresa={nombreEmpresa}
+          fmt={fmt}
         />
       </div>
     </div>

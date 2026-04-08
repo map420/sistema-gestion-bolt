@@ -3,10 +3,12 @@ import { useState, useCallback } from 'react'
 import { ChevronLeft, ChevronRight, Save } from 'lucide-react'
 import type { Registro } from '../../types'
 import { loadData, updateData } from '../../storage'
-import { hoy, formatFecha, uuid, formatMoneda } from '../../utils'
+import { hoy, formatFecha, uuid } from '../../utils'
+import { useConfig } from '../../context/ConfigContext'
 import TrabajadorRow from './TrabajadorRow'
 
 export default function RegistroDiario() {
+  const { fmt } = useConfig()
   const [fecha, setFecha] = useState(hoy())
   const [data, setData] = useState(() => loadData())
   const [drafts, setDrafts] = useState<Record<string, Omit<Registro, 'id' | 'trabajadorId' | 'fecha'> | null>>({})
@@ -81,7 +83,7 @@ export default function RegistroDiario() {
           <div className="bg-[#111] border border-white/10 rounded-xl px-4 py-3.5 flex items-center justify-between sticky bottom-[80px] md:bottom-4">
             <div>
               <p className="text-xs text-[#555] uppercase tracking-wide">Total del día</p>
-              <p className="text-xl font-bold text-[#9d7ff0] tracking-tight">{formatMoneda(totalDia)}</p>
+              <p className="text-xl font-bold text-[#9d7ff0] tracking-tight">{fmt(totalDia)}</p>
             </div>
             <button onClick={guardar} className="flex items-center gap-2 bg-[#9d7ff0] hover:bg-[#8b6fd4] text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors">
               <Save size={15} />

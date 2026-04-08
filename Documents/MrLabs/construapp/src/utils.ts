@@ -12,8 +12,9 @@ export function formatFecha(fecha: string): string {
   return date.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })
 }
 
+/** @deprecated usar useConfig().fmt para respetar la moneda configurada */
 export function formatMoneda(monto: number): string {
-  return `$${monto.toLocaleString('es', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+  return `$ ${monto.toLocaleString('es', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 }
 
 export function semanaActual(): { desde: string; hasta: string } {

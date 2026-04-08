@@ -2,10 +2,11 @@ import { useState } from 'react'
 import { Plus, Pencil, PowerOff } from 'lucide-react'
 import type { Trabajador } from '../../types'
 import { updateData, loadData } from '../../storage'
-import { formatMoneda } from '../../utils'
+import { useConfig } from '../../context/ConfigContext'
 import TrabajadorForm from './TrabajadorForm'
 
 export default function Trabajadores() {
+  const { fmt } = useConfig()
   const [data, setData] = useState(() => loadData())
   const [formAbierto, setFormAbierto] = useState(false)
   const [editando, setEditando] = useState<Trabajador | undefined>()
@@ -65,7 +66,7 @@ export default function Trabajadores() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-[#f0f0f0] truncate">{t.nombre}</p>
-                <p className="text-xs text-[#555]">{t.oficio} · {formatMoneda(t.tarifa)}/{t.tipoPago === 'dia' ? 'día' : 'hora'}</p>
+                <p className="text-xs text-[#555]">{t.oficio} · {fmt(t.tarifa)}/{t.tipoPago === 'dia' ? 'día' : 'hora'}</p>
               </div>
               <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${t.activo ? 'bg-[#34d39920] text-[#34d399]' : 'bg-[#55555520] text-[#555]'}`}>
                 {t.activo ? 'Activo' : 'Inactivo'}

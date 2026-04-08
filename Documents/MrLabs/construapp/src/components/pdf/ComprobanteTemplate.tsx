@@ -1,6 +1,6 @@
 // src/components/pdf/ComprobanteTemplate.tsx
 import type { Trabajador, Registro, Pago } from '../../types'
-import { formatMoneda } from '../../utils'
+
 
 interface Props {
   id: string
@@ -8,9 +8,10 @@ interface Props {
   registros: Registro[]
   pago: Pago
   nombreEmpresa?: string
+  fmt: (monto: number) => string
 }
 
-export default function ComprobanteTemplate({ id, trabajador, registros, pago, nombreEmpresa = 'Constructora' }: Props) {
+export default function ComprobanteTemplate({ id, trabajador, registros, pago, nombreEmpresa = 'Constructora', fmt }: Props) {
   return (
     <div id={id} style={{ fontFamily: 'Arial, sans-serif', padding: '32px', color: '#111', background: '#fff', maxWidth: '700px' }}>
       {/* Header */}
@@ -45,7 +46,7 @@ export default function ComprobanteTemplate({ id, trabajador, registros, pago, n
               <td style={{ padding: '7px 8px', border: '1px solid #eee' }}>{r.fecha}</td>
               <td style={{ padding: '7px 8px', border: '1px solid #eee' }}>{r.actividad || '—'}</td>
               <td style={{ padding: '7px 8px', border: '1px solid #eee', textAlign: 'right' }}>{r.cantidad}</td>
-              <td style={{ padding: '7px 8px', border: '1px solid #eee', textAlign: 'right' }}>{formatMoneda(r.montoCalculado)}</td>
+              <td style={{ padding: '7px 8px', border: '1px solid #eee', textAlign: 'right' }}>{fmt(r.montoCalculado)}</td>
             </tr>
           ))}
         </tbody>
@@ -54,7 +55,7 @@ export default function ComprobanteTemplate({ id, trabajador, registros, pago, n
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '32px' }}>
         <div style={{ background: '#f5f5f5', borderRadius: '8px', padding: '12px 20px', textAlign: 'right' }}>
           <p style={{ fontSize: '11px', color: '#888', margin: '0 0 4px' }}>Total pagado</p>
-          <p style={{ fontSize: '22px', fontWeight: 800, margin: 0 }}>{formatMoneda(pago.monto)}</p>
+          <p style={{ fontSize: '22px', fontWeight: 800, margin: 0 }}>{fmt(pago.monto)}</p>
         </div>
       </div>
       {/* Firmas */}
