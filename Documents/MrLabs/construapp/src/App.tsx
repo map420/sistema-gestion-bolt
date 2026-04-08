@@ -39,15 +39,18 @@ function AppShell() {
 function AppContent() {
   const { user } = useAuth()
   if (!user) return <Login />
-  return <AppShell />
+  // key={user.id} forces ConfigProvider to remount fresh for each user
+  return (
+    <ConfigProvider key={user.id}>
+      <AppShell />
+    </ConfigProvider>
+  )
 }
 
 export default function App() {
   return (
     <AuthProvider>
-      <ConfigProvider>
-        <AppContent />
-      </ConfigProvider>
+      <AppContent />
     </AuthProvider>
   )
 }
