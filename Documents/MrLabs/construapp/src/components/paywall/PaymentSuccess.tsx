@@ -1,25 +1,40 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CheckCircle, Loader2 } from 'lucide-react'
+import { useAuth } from '../../context/AuthContext'
+
+interface PendingRegistration {
+  email: string
+  password: string
+}
 
 interface Props {
   sessionId: string
   onConfirm: (sessionId: string) => Promise<void>
+  pendingRegistration?: PendingRegistration
 }
 
-export default function PaymentSuccess({ sessionId, onConfirm }: Props) {
+export default function PaymentSuccess({ sessionId, onConfirm, pendingRegistration }: Props) {
   const { t } = useTranslation()
+  const { register } = useAuth()
   const [status, setStatus] = useState<'verifying' | 'success' | 'error'>('verifying')
   const [errorMsg, setErrorMsg] = useState('')
 
   useEffect(() => {
-    onConfirm(sessionId)
+    const run = async () => {
+      // If new user (came from "Pago único" in register form), create account first
+      if (pendingRegistration) {
+        const result = register(pendingRegistration.email, pendingRegistration.password)
+        if (!result.ok) throw new Error(result.error ?? 'register failed')
+        sessionStorage.removeItem('construapp_pending_pay')
+      }
+      await onConfirm(sessionId)
+    }
+
+    run()
       .then(() => {
         setStatus('success')
-        // Clear URL params after short delay so user can see the success state
-        setTimeout(() => {
-          window.history.replaceState({}, '', '/')
-        }, 1500)
+        setTimeout(() => window.history.replaceState({}, '', '/'), 2000)
       })
       .catch((err: unknown) => {
         setErrorMsg(err instanceof Error ? err.message : 'Error desconocido')

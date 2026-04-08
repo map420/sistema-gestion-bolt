@@ -43,23 +43,27 @@ export default function Login() {
     setError('')
     if (!validate()) return
     setLoadingPay(true)
-    const result = register(email.trim(), password)
-    if (!result.ok && result.error) {
-      setError(t(`auth.${result.error}`))
-      setLoadingPay(false)
-      return
-    }
+
+    // Store credentials temporarily — account is created ONLY after payment succeeds
+    const pendingId = crypto.randomUUID()
+    sessionStorage.setItem('construapp_pending_pay', JSON.stringify({
+      id: pendingId,
+      email: email.trim(),
+      password,
+    }))
+
     try {
       const res = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: result.userId }),
+        body: JSON.stringify({ userId: pendingId }),
       })
       if (!res.ok) throw new Error('api error')
       const data = await res.json() as { url: string }
       window.location.href = data.url
     } catch {
       setError(t('paywall.error'))
+      sessionStorage.removeItem('construapp_pending_pay')
       setLoadingPay(false)
     }
   }

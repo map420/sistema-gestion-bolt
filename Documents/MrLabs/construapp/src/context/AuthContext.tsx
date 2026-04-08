@@ -77,7 +77,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!res.ok) throw new Error('verify failed')
     const data = await res.json() as { paid: boolean; userId?: string }
     if (!data.paid) throw new Error('not paid')
-    const uid = user?.id
+    // Fallback to session storage in case this is called right after register()
+    // (React state may not have updated yet in that scenario)
+    const uid = user?.id ?? getSession()?.id
     if (!uid) throw new Error('no user')
     markUserAsPaid(uid, sessionId)
     setTrialStatus(computeTrialStatus(uid))

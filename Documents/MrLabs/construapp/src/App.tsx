@@ -58,7 +58,12 @@ function AppContent() {
   if (!user) return <Login />
 
   if (paymentStatus === 'success' && sessionId) {
-    return <PaymentSuccess sessionId={sessionId} onConfirm={confirmPayment} />
+    // Read pending registration if user came from "Pago único" on register form
+    const pendingRaw = sessionStorage.getItem('construapp_pending_pay')
+    const pendingRegistration = pendingRaw
+      ? JSON.parse(pendingRaw) as { email: string; password: string }
+      : undefined
+    return <PaymentSuccess sessionId={sessionId} onConfirm={confirmPayment} pendingRegistration={pendingRegistration} />
   }
 
   if (paymentStatus === 'cancelled') {
