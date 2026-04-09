@@ -32,7 +32,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     await resend.emails.send({
-      from: 'ConstruApp <noreply@construapp.vercel.app>',
+      from: 'ConstruApp <onboarding@resend.dev>',
       to: email,
       subject: `${code} — Tu código de verificación`,
       html: `
