@@ -61,16 +61,23 @@ export default function Login() {
       const res = await fetch('/api/send-code', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim() }),
+        body: JSON.stringify({ email: email.trim(), intent: 'register' }),
       })
       const data = await res.json() as { token?: string; error?: string }
-      if (!res.ok || !data.token) throw new Error(data.error ?? 'send_failed')
+      if (!res.ok || !data.token) {
+        if (data.error === 'errUserExists') throw new Error('errUserExists')
+        throw new Error(data.error ?? 'send_failed')
+      }
       setOtpToken(data.token)
       setCode(['', '', '', '', '', ''])
       setStep('verify')
       setTimeout(() => inputRefs.current[0]?.focus(), 100)
-    } catch {
-      setError('No se pudo enviar el código. Intenta de nuevo.')
+    } catch (err) {
+      if (err instanceof Error && err.message === 'errUserExists') {
+        setError('Este correo ya está registrado. Inicia sesión.')
+      } else {
+        setError('No se pudo enviar el código. Intenta de nuevo.')
+      }
     } finally {
       setSending(false)
     }

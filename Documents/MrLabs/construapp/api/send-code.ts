@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { Resend } from 'resend'
 import { createHmac } from 'crypto'
+import { supabaseAdmin } from './_lib/supabase'
 
 const OTP_TTL_MS = 10 * 60 * 1000 // 10 minutes
 
@@ -18,9 +19,19 @@ function signToken(email: string, code: string, ts: number): string {
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') return res.status(405).end()
 
-  const { email } = req.body as { email?: string }
+  const { email, intent } = req.body as { email?: string; intent?: string }
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return res.status(400).json({ error: 'invalid_email' })
+  }
+
+  // Si es registro, verificar que el email no esté ya registrado
+  if (intent === 'register') {
+    const { data: existing } = await supabaseAdmin
+      .from('users')
+      .select('id')
+      .eq('email', email.trim().toLowerCase())
+      .maybeSingle()
+    if (existing) return res.status(409).json({ error: 'errUserExists' })
   }
 
   const code = generateCode()
