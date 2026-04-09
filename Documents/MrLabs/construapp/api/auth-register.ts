@@ -1,6 +1,14 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { supabaseAdmin } from './_lib/supabase'
-import { signSessionToken } from './_lib/auth'
+import { createClient } from '@supabase/supabase-js'
+import { createHmac } from 'crypto'
+
+const supabaseAdmin = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_KEY!, { auth: { persistSession: false } })
+
+function signSessionToken(userId: string): string {
+  const ts = Date.now()
+  const sig = createHmac('sha256', process.env.SESSION_SECRET!).update(`${userId}|${ts}`).digest('hex')
+  return `${userId}.${ts}.${sig}`
+}
 
 function hashPassword(password: string): string {
   return Buffer.from('construapp:' + password).toString('base64')

@@ -1,6 +1,27 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { supabaseAdmin } from './_lib/supabase'
-import { getAuthUserId } from './_lib/auth'
+import { createClient } from '@supabase/supabase-js'
+import { createHmac } from 'crypto'
+
+const supabaseAdmin = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_KEY!, { auth: { persistSession: false } })
+
+function getAuthUserId(req: VercelRequest): string | null {
+  const auth = req.headers.authorization
+  if (!auth?.startsWith('Bearer ')) return null
+  const token = auth.slice(7)
+  const firstDot = token.indexOf('.')
+  const lastDot = token.lastIndexOf('.')
+  if (firstDot === lastDot) return null
+  const userId = token.slice(0, firstDot)
+  const rest = token.slice(firstDot + 1)
+  const dotIdx = rest.indexOf('.')
+  if (dotIdx === -1) return null
+  const tsStr = rest.slice(0, dotIdx)
+  const sig = rest.slice(dotIdx + 1)
+  const ts = parseInt(tsStr, 10)
+  if (isNaN(ts) || Date.now() - ts > 30 * 24 * 60 * 60 * 1000) return null
+  const expected = createHmac('sha256', process.env.SESSION_SECRET!).update(`${userId}|${ts}`).digest('hex')
+  return sig === expected ? userId : null
+}
 
 const DEFAULT_DATA = { trabajadores: [], registros: [], pagos: [], proyectos: [] }
 

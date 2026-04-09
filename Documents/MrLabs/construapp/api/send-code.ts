@@ -1,7 +1,13 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { Resend } from 'resend'
 import { createHmac } from 'crypto'
-import { supabaseAdmin } from './_lib/supabase'
+import { createClient } from '@supabase/supabase-js'
+
+const supabaseAdmin = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_KEY!,
+  { auth: { persistSession: false } }
+)
 
 const OTP_TTL_MS = 10 * 60 * 1000 // 10 minutes
 
