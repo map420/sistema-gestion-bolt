@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, type ReactNode } from 'react'
-import { getSession, setSession, loginUser, registerUser, setCurrentUser, getFullUser, markUserAsPaid } from '../storage'
+import { getSession, setSession, type SessionData } from '../storage'
+import { getToken, setToken, apiRegister, apiLogin } from '../lib/api'
 import { getTrialStatus } from '../utils'
 
 export interface AuthUser {
@@ -17,72 +18,90 @@ export interface TrialStatus {
 interface AuthContextValue {
   user: AuthUser | null
   trialStatus: TrialStatus | null
-  login: (email: string, password: string) => { ok: boolean; error?: string; userId?: string }
-  register: (email: string, password: string) => { ok: boolean; error?: string; userId?: string }
+  login: (email: string, password: string) => Promise<{ ok: boolean; error?: string; userId?: string }>
+  register: (email: string, password: string) => Promise<{ ok: boolean; error?: string; userId?: string }>
   logout: () => void
   confirmPayment: (sessionId: string) => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
 
-function computeTrialStatus(userId: string): TrialStatus {
-  const fullUser = getFullUser(userId)
-  if (!fullUser) return { paid: false, inTrial: true, expired: false, daysRemaining: 15 }
-  return getTrialStatus(fullUser)
+function initUser(): AuthUser | null {
+  if (!getToken()) return null
+  const session = getSession()
+  if (!session) return null
+  return { id: session.id, nombre: session.nombre }
 }
 
-function initUser(): AuthUser | null {
+function initTrialStatus(): TrialStatus | null {
+  if (!getToken()) return null
   const session = getSession()
-  if (session) {
-    setCurrentUser(session.id)
-    return session
-  }
-  return null
+  if (!session) return null
+  return getTrialStatus(session)
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(initUser)
-  const [trialStatus, setTrialStatus] = useState<TrialStatus | null>(() => {
-    const session = getSession()
-    if (session) return computeTrialStatus(session.id)
-    return null
-  })
+  const [trialStatus, setTrialStatus] = useState<TrialStatus | null>(initTrialStatus)
 
-  const login = (email: string, password: string): { ok: boolean; error?: string; userId?: string } => {
-    const result = loginUser(email, password)
+  const login = async (email: string, password: string): Promise<{ ok: boolean; error?: string; userId?: string }> => {
+    const result = await apiLogin(email, password)
     if (!result.ok || !result.user) return { ok: false, error: result.error }
-    setCurrentUser(result.user.id)
-    setSession(result.user)
-    setUser(result.user)
-    setTrialStatus(computeTrialStatus(result.user.id))
-    return { ok: true, userId: result.user.id }
+
+    const session: SessionData = {
+      id: result.user.id,
+      nombre: result.user.nombre,
+      creadoEn: result.user.creadoEn,
+      paidAt: result.user.paidAt,
+    }
+    setSession(session)
+    setUser({ id: session.id, nombre: session.nombre })
+    setTrialStatus(getTrialStatus(session))
+    return { ok: true, userId: session.id }
   }
 
-  const register = (email: string, password: string): { ok: boolean; error?: string; userId?: string } => {
-    const result = registerUser(email, password)
-    if (!result.ok) return { ok: false, error: result.error }
-    // Auto-login after register
-    return login(email, password)
+  const register = async (email: string, password: string): Promise<{ ok: boolean; error?: string; userId?: string }> => {
+    const result = await apiRegister(email, password)
+    if (!result.ok || !result.user) return { ok: false, error: result.error }
+
+    const session: SessionData = {
+      id: result.user.id,
+      nombre: result.user.nombre,
+      creadoEn: result.user.creadoEn,
+    }
+    setSession(session)
+    setUser({ id: session.id, nombre: session.nombre })
+    setTrialStatus(getTrialStatus(session))
+    return { ok: true, userId: session.id }
   }
 
   const logout = () => {
-    setCurrentUser(null)
+    setToken(null)
     setSession(null)
     setUser(null)
     setTrialStatus(null)
   }
 
   const confirmPayment = async (sessionId: string): Promise<void> => {
-    const res = await fetch(`/api/verify-session?sessionId=${sessionId}`)
-    if (!res.ok) throw new Error('verify failed')
-    const data = await res.json() as { paid: boolean; userId?: string }
-    if (!data.paid) throw new Error('not paid')
-    // Fallback to session storage in case this is called right after register()
-    // (React state may not have updated yet in that scenario)
     const uid = user?.id ?? getSession()?.id
     if (!uid) throw new Error('no user')
-    markUserAsPaid(uid, sessionId)
-    setTrialStatus(computeTrialStatus(uid))
+
+    const res = await fetch('/api/verify-session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sessionId, userId: uid }),
+    })
+    if (!res.ok) throw new Error('verify failed')
+    const data = await res.json() as { paid: boolean }
+    if (!data.paid) throw new Error('not paid')
+
+    // Update local session and trial status
+    const session = getSession()
+    if (session) {
+      const updated = { ...session, paidAt: new Date().toISOString() }
+      setSession(updated)
+      setTrialStatus(getTrialStatus(updated))
+    }
   }
 
   return (

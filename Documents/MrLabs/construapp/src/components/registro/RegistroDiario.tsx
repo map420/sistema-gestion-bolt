@@ -3,7 +3,7 @@ import { useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChevronLeft, ChevronRight, Save, Check } from 'lucide-react'
 import type { Registro } from '../../types'
-import { loadData, updateData } from '../../storage'
+import { useData } from '../../context/DataContext'
 import { hoy, uuid } from '../../utils'
 import { useConfig } from '../../context/ConfigContext'
 import TrabajadorRow from './TrabajadorRow'
@@ -13,8 +13,8 @@ type LineaDraft = Omit<Registro, 'id' | 'trabajadorId' | 'fecha'>
 export default function RegistroDiario() {
   const { fmt, fmtFecha } = useConfig()
   const { t } = useTranslation()
+  const { data, updateData } = useData()
   const [fecha, setFecha] = useState(hoy())
-  const [data, setData] = useState(() => loadData())
   const [drafts, setDrafts] = useState<Record<string, LineaDraft[]>>({})
   const [guardado, setGuardado] = useState(false)
 
@@ -39,7 +39,7 @@ export default function RegistroDiario() {
     registrosDelDia.filter(r => !(r.trabajadorId in drafts)).reduce((sum, r) => sum + r.montoCalculado, 0)
 
   const guardar = () => {
-    const next = updateData(d => {
+    updateData(d => {
       Object.entries(drafts).forEach(([trabajadorId, lineas]) => {
         d.registros = d.registros.filter(r => !(r.trabajadorId === trabajadorId && r.fecha === fecha))
         lineas.forEach(linea => {
@@ -48,7 +48,6 @@ export default function RegistroDiario() {
       })
       return d
     })
-    setData(next)
     setDrafts({})
     setGuardado(true)
     setTimeout(() => setGuardado(false), 2000)

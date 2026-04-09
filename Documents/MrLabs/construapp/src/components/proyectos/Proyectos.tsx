@@ -2,19 +2,19 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus, Pencil, PowerOff } from 'lucide-react'
 import type { Proyecto } from '../../types'
-import { loadData, updateData } from '../../storage'
+import { useData } from '../../context/DataContext'
 import ProyectoForm from './ProyectoForm'
 
 export default function Proyectos() {
   const { t } = useTranslation()
-  const [data, setData] = useState(() => loadData())
+  const { data, updateData } = useData()
   const [formAbierto, setFormAbierto] = useState(false)
   const [editando, setEditando] = useState<Proyecto | undefined>()
 
   const proyectos = data.proyectos
 
   const guardar = (p: Proyecto) => {
-    const next = updateData(d => {
+    updateData(d => {
       const idx = d.proyectos.findIndex(x => x.id === p.id)
       if (idx >= 0) {
         d.proyectos[idx] = p
@@ -23,18 +23,16 @@ export default function Proyectos() {
       }
       return d
     })
-    setData(next)
     setFormAbierto(false)
     setEditando(undefined)
   }
 
   const toggleActivo = (id: string) => {
-    const next = updateData(d => {
+    updateData(d => {
       const p = d.proyectos.find(x => x.id === id)
       if (p) p.activo = !p.activo
       return d
     })
-    setData(next)
   }
 
   return (

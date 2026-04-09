@@ -24,7 +24,7 @@ export default function PaymentSuccess({ sessionId, onConfirm, pendingRegistrati
     const run = async () => {
       // If new user (came from "Pago único" in register form), create account first
       if (pendingRegistration) {
-        const result = register(pendingRegistration.email, pendingRegistration.password)
+        const result = await register(pendingRegistration.email, pendingRegistration.password)
         if (!result.ok) throw new Error(result.error ?? 'register failed')
         sessionStorage.removeItem('construapp_pending_pay')
       }

@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Eye, DollarSign, FileText, TrendingUp } from 'lucide-react'
 import type { Trabajador, Pago } from '../../types'
-import { loadData, updateData } from '../../storage'
+import { useData } from '../../context/DataContext'
 import { calcularSaldo, semanaActual, quincenaActual, siguienteFolio } from '../../utils'
 import { useConfig } from '../../context/ConfigContext'
 import { usePDF } from '../../hooks/usePDF'
@@ -20,7 +20,7 @@ interface Props {
 export default function Pagos({ nombreEmpresa }: Props) {
   const { fmt } = useConfig()
   const { t } = useTranslation()
-  const [data, setData] = useState(() => loadData())
+  const { data, updateData } = useData()
   const [modo, setModo] = useState<ModoPeriodo>('semana')
   const [periodoCustom, setPeriodoCustom] = useState({ desde: '', hasta: '' })
   const [pagoModal, setPagoModal] = useState<Trabajador | null>(null)
@@ -38,12 +38,11 @@ export default function Pagos({ nombreEmpresa }: Props) {
   const trabajadores = data.trabajadores.filter(tr => tr.activo)
 
   const guardarPago = (pagoSinFolio: Omit<Pago, 'folio'>) => {
-    const next = updateData(d => {
+    updateData(d => {
       const folio = siguienteFolio(d.pagos)
       d.pagos.push({ ...pagoSinFolio, folio })
       return d
     })
-    setData(next)
     setPagoModal(null)
   }
 

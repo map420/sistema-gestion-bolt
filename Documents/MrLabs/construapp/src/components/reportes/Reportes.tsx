@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Download } from 'lucide-react'
-import { loadData } from '../../storage'
+import { useData } from '../../context/DataContext'
 import { calcularSaldo, semanaActual, quincenaActual } from '../../utils'
 import { useConfig } from '../../context/ConfigContext'
 import { usePDF } from '../../hooks/usePDF'
@@ -18,7 +18,7 @@ interface Props {
 export default function Reportes({ nombreEmpresa }: Props) {
   const { fmt } = useConfig()
   const { t } = useTranslation()
-  const [data] = useState(() => loadData())
+  const { data } = useData()
   const [modo, setModo] = useState<ModoPeriodo>('semana')
   const [periodoCustom, setPeriodoCustom] = useState({ desde: '', hasta: '' })
   const [vistaTab, setVistaTab] = useState<VistaTab>('trabajadores')

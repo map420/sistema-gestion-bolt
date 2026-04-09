@@ -17,6 +17,7 @@ import PaymentCancelled from './components/paywall/PaymentCancelled'
 import TrialBanner from './components/TrialBanner'
 import { ConfigProvider, useConfig } from './context/ConfigContext'
 import { AuthProvider, useAuth } from './context/AuthContext'
+import { DataProvider } from './context/DataContext'
 
 interface AppShellProps {
   trialDaysRemaining: number | null
@@ -112,9 +113,11 @@ function AppContent() {
   if (trialStatus?.expired) return <Paywall userId={user.id} />
 
   return (
-    <ConfigProvider key={user.id}>
-      <AppShell trialDaysRemaining={trialStatus?.inTrial ? trialStatus.daysRemaining : null} />
-    </ConfigProvider>
+    <DataProvider key={user.id}>
+      <ConfigProvider key={user.id}>
+        <AppShell trialDaysRemaining={trialStatus?.inTrial ? trialStatus.daysRemaining : null} />
+      </ConfigProvider>
+    </DataProvider>
   )
 }
 

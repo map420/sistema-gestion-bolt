@@ -38,12 +38,17 @@ export default function Login() {
   }
 
   // ── Login (no OTP needed) ─────────────────────────────────────────────────
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     if (!validate()) return
-    const result = login(email.trim(), password)
-    if (!result.ok && result.error) setError(t(`auth.${result.error}`))
+    setSending(true)
+    try {
+      const result = await login(email.trim(), password)
+      if (!result.ok && result.error) setError(t(`auth.${result.error}`))
+    } finally {
+      setSending(false)
+    }
   }
 
   // ── Send OTP ──────────────────────────────────────────────────────────────
@@ -117,7 +122,7 @@ export default function Login() {
 
       // OTP verified — proceed with intent
       if (intent === 'trial') {
-        const result = register(email.trim(), password)
+        const result = await register(email.trim(), password)
         if (!result.ok && result.error) { setError(t(`auth.${result.error}`)); setVerifying(false); return }
       } else {
         // Pay intent: save pending registration, redirect to Stripe
@@ -282,8 +287,9 @@ export default function Login() {
             )}
 
             {mode === 'login' && (
-              <button type="submit" className="w-full accent-gradient text-white font-semibold py-3 rounded-xl text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity mt-1 shadow-lg shadow-[#7c5ff030]">
-                {t('auth.loginBtn')} <ArrowRight size={15} />
+              <button type="submit" disabled={sending} className="w-full accent-gradient text-white font-semibold py-3 rounded-xl text-sm flex items-center justify-center gap-2 hover:opacity-90 disabled:opacity-50 transition-opacity mt-1 shadow-lg shadow-[#7c5ff030]">
+                {sending ? <Loader2 size={15} className="animate-spin" /> : <ArrowRight size={15} />}
+                {sending ? 'Iniciando sesión...' : t('auth.loginBtn')}
               </button>
             )}
           </form>

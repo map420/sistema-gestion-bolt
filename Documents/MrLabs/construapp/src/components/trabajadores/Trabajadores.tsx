@@ -2,14 +2,14 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus, Pencil, PowerOff, Users } from 'lucide-react'
 import type { Trabajador } from '../../types'
-import { updateData, loadData } from '../../storage'
+import { useData } from '../../context/DataContext'
 import { useConfig } from '../../context/ConfigContext'
 import TrabajadorForm from './TrabajadorForm'
 
 export default function Trabajadores() {
   const { fmt } = useConfig()
   const { t } = useTranslation()
-  const [data, setData] = useState(() => loadData())
+  const { data, updateData } = useData()
   const [formAbierto, setFormAbierto] = useState(false)
   const [editando, setEditando] = useState<Trabajador | undefined>()
 
@@ -17,24 +17,22 @@ export default function Trabajadores() {
   const activos = trabajadores.filter(tr => tr.activo).length
 
   const guardar = (tr: Trabajador) => {
-    const next = updateData(d => {
+    updateData(d => {
       const idx = d.trabajadores.findIndex(x => x.id === tr.id)
       if (idx >= 0) d.trabajadores[idx] = tr
       else d.trabajadores.push(tr)
       return d
     })
-    setData(next)
     setFormAbierto(false)
     setEditando(undefined)
   }
 
   const toggleActivo = (id: string) => {
-    const next = updateData(d => {
+    updateData(d => {
       const tr = d.trabajadores.find(x => x.id === id)
       if (tr) tr.activo = !tr.activo
       return d
     })
-    setData(next)
   }
 
   return (
